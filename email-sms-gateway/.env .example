@@ -1,0 +1,18 @@
+# Server Configuration
+PORT=9090
+
+# Teletalk SMS Gateway Configuration
+TELETALK_USER=
+TELETALK_USER_ID=
+TELETALK_ENCR_KEY=
+TELETALK_PASSWORD=
+TELETALK_BASE_URL=https://bulksms.teletalk.com.bd/jlinktbls.php
+
+# Email Configuration
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=notification.gateway.nts@gmail.com
+EMAIL_PASSWORD=
+EMAIL_FROM=notification.gateway.nts@gmail.com
+EMAIL_FROM_NAME=SMS Gateway
