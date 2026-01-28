@@ -1,21 +1,29 @@
 const axios = require('axios');
 const { getConfig } = require('./config-store');
+const consoleLog = require('./console-logger');
 
 /**
- * Send email notification to multiple email addresses
- * @param {Array} emailAddresses - List of email addresses
+ * Send email notification to email address
+ * @param {string} emailAddress - Single email address to send to
  * @param {string} subject - Email subject
  * @param {string} text - Email body text
  * @param {string} [html] - Optional HTML body
+ * @param {string} [emailEndpoint] - Optional email endpoint URL. If not provided, uses config
  */
-async function sendEmail(emailAddresses, subject, text, html) {
+async function sendEmail(emailAddress, subject, text, html, emailEndpoint) {
   try {
     const config = getConfig();
-    const recipients = emailAddresses && emailAddresses.length ? emailAddresses : config.EMAIL_ADDRESSES;
-    const emailAddressesString = recipients.join(',');
+    
+    // Use provided endpoint or fall back to config
+    const endpoint = emailEndpoint || config.EMAIL_ENDPOINT;
+    
+    if (!endpoint) {
+      consoleLog.error('Email endpoint not configured', 'EMAIL');
+      throw new Error('Email endpoint not configured');
+    }
     
     const payload = {
-      to: emailAddressesString,
+      to: emailAddress,
       subject,
       text
     };
@@ -24,16 +32,24 @@ async function sendEmail(emailAddresses, subject, text, html) {
       payload.html = html;
     }
 
-    const response = await axios.post(config.EMAIL_ENDPOINT, payload);
+    // Prepare headers with API key if configured
+    const headers = { 'Content-Type': 'application/json' };
+    const apiKey = process.env.GATEWAY_API_KEY;
+    if (apiKey) {
+      headers['X-API-Key'] = apiKey;
+    }
+
+    consoleLog.debug(`Sending email to ${emailAddress} via ${endpoint}`, 'EMAIL');
+    const response = await axios.post(endpoint, payload, { headers });
     
-    console.log(`[${new Date().toISOString()}] Email sent successfully to ${emailAddressesString}`);
-    console.log('Email Response:', response.data);
+    consoleLog.debug(`Email sent successfully to ${emailAddress}`, 'EMAIL');
+    consoleLog.debug(`Email Response: ${JSON.stringify(response.data)}`, 'EMAIL');
     
     return response.data;
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Error sending email:`, error.message);
+    consoleLog.error(`Error sending email to ${emailAddress}: ${error.message}`, 'EMAIL', error);
     if (error.response) {
-      console.error('Email API Response:', error.response.data);
+      consoleLog.error(`Email API Response: ${JSON.stringify(error.response.data)}`, 'EMAIL');
     }
     throw error;
   }

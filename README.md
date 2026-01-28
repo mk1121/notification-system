@@ -67,7 +67,23 @@ A comprehensive notification system that monitors payment transactions via API a
    npm install
    ```
 
-3. **Configure the system**
+3. **Configure environment variables**
+   
+   Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env`:
+   ```env
+   # Application Environment
+   NODE_ENV=development  # Use 'production' for production
+   
+   # Server Configuration
+   CONTROL_SERVER_PORT=3000
+   ```
+
+4. **Configure the system**
    
    Edit `controllerServer/config.js`:
    ```javascript
@@ -104,11 +120,38 @@ A comprehensive notification system that monitors payment transactions via API a
 
 ## Usage
 
+### Environment Modes
+
+The system supports two environment modes with different logging levels:
+
+**Development Mode** (default):
+- Shows all logs including debug information
+- Detailed error stack traces
+- Verbose API responses
+- Useful for development and troubleshooting
+
+**Production Mode**:
+- Shows only critical logs (errors, warnings, important info)
+- Cleaner console output
+- Better performance
+- Recommended for production deployment
+
+To switch to production mode:
+```bash
+export NODE_ENV=production
+npm start
+```
+
+Or set it in your `.env` file:
+```env
+NODE_ENV=production
+```
+
 ### Starting the System
 
 **Production mode:**
 ```bash
-npm start
+NODE_ENV=production npm start
 ```
 
 This runs both the notification scheduler and control server concurrently.

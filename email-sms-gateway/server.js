@@ -6,6 +6,13 @@ const EmailClient = require('./emailClient');
 const app = express();
 const port = process.env.PORT || 9090;
 
+// Kill Switch State (can be toggled at runtime)
+let killSwitch = {
+    gateway: process.env.GATEWAY_ENABLED !== 'false', // Main kill switch
+    sms: process.env.SMS_ENABLED !== 'false',
+    email: process.env.EMAIL_ENABLED !== 'false'
+};
+
 // Initialize Teletalk SMS Client
 const smsClient = new TeletalkSmsClient({
     user: process.env.TELETALK_USER,
@@ -30,10 +37,61 @@ const emailClient = new EmailClient({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Authentication middleware
+const authMiddleware = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    const validApiKey = process.env.API_KEY;
+    
+    // Skip auth if API_KEY is not set (for backward compatibility)
+    if (!validApiKey) {
+        return next();
+    }
+    
+    if (!apiKey || apiKey !== validApiKey) {
+        return res.status(401).json({
+            status: 'ERROR',
+            error: 'Unauthorized - Invalid API Key'
+        });
+    }
+    
+    next();
+};
+
+// Kill Switch Middleware
+const killSwitchMiddleware = (service) => {
+    return (req, res, next) => {
+        if (!killSwitch.gateway) {
+            return res.status(503).json({
+                status: 'ERROR',
+                error: 'Gateway is currently disabled (Emergency Kill Switch Active)',
+                service: 'all'
+            });
+        }
+        
+        if (service === 'sms' && !killSwitch.sms) {
+            return res.status(503).json({
+                status: 'ERROR',
+                error: 'SMS service is currently disabled',
+                service: 'sms'
+            });
+        }
+        
+        if (service === 'email' && !killSwitch.email) {
+            return res.status(503).json({
+                status: 'ERROR',
+                error: 'Email service is currently disabled',
+                service: 'email'
+            });
+        }
+        
+        next();
+    };
+};
+
 // CORS
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-API-Key');
     next();
 });
 
@@ -42,18 +100,44 @@ app.use((req, res, next) => {
 // Health check
 app.get('/', (req, res) => {
     res.json({
-        status: 'OK',
-        message: 'SMS & Email Gateway is running',
+        status: killSwitch.gateway ? 'OK' : 'DISABLED',
+        message: killSwitch.gateway ? 'SMS & Email Gateway is running' : 'Gateway is currently disabled (Kill Switch Active)',
         version: '1.0.0',
         services: {
-            sms: 'enabled',
-            email: 'enabled'
+            gateway: killSwitch.gateway ? 'enabled' : 'disabled',
+            sms: killSwitch.sms ? 'enabled' : 'disabled',
+            email: killSwitch.email ? 'enabled' : 'disabled'
         }
     });
 });
 
+// Admin: Toggle Kill Switch
+app.post('/api/admin/kill-switch', authMiddleware, (req, res) => {
+    const { gateway, sms, email } = req.body;
+    
+    if (gateway !== undefined) killSwitch.gateway = gateway === true;
+    if (sms !== undefined) killSwitch.sms = sms === true;
+    if (email !== undefined) killSwitch.email = email === true;
+    
+    console.log(`[ADMIN] Kill Switch Updated:`, killSwitch);
+    
+    res.json({
+        status: 'OK',
+        message: 'Kill switch updated',
+        killSwitch: killSwitch
+    });
+});
+
+// Admin: Get Kill Switch Status
+app.get('/api/admin/kill-switch', authMiddleware, (req, res) => {
+    res.json({
+        status: 'OK',
+        killSwitch: killSwitch
+    });
+});
+
 // Send SMS (single or multiple numbers)
-app.get('/api/sms/send', async (req, res) => {
+app.get('/api/sms/send', authMiddleware, killSwitchMiddleware('sms'), async (req, res) => {
     try {
         const { to, text } = req.query;
         
@@ -185,7 +269,7 @@ app.get('/api/sms/balance', async (req, res) => {
 // ==================== EMAIL API ENDPOINTS ====================
 
 // Send Email (single or multiple recipients)
-app.post('/api/email/send', async (req, res) => {
+app.post('/api/email/send', authMiddleware, killSwitchMiddleware('email'), async (req, res) => {
     try {
         const { to, subject, text, html } = req.body;
         
@@ -248,7 +332,7 @@ app.post('/api/email/send', async (req, res) => {
 });
 
 // Send Bulk Email
-app.post('/api/email/send-batch', async (req, res) => {
+app.post('/api/email/send-batch', authMiddleware, killSwitchMiddleware('email'), async (req, res) => {
     try {
         const { emails, subject, text, html } = req.body;
         

@@ -1,6 +1,14 @@
 # Server Configuration
 PORT=9090
 
+# Emergency Kill Switch (set to false to disable services)
+GATEWAY_ENABLED=true
+SMS_ENABLED=true
+EMAIL_ENABLED=true
+
+# API Authentication (optional - leave empty to disable)
+API_KEY=your-secret-api-key-
+
 # Teletalk SMS Gateway Configuration
 TELETALK_USER=
 TELETALK_USER_ID=

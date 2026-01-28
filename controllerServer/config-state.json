@@ -1,18 +1,34 @@
 {
-  "API_ENDPOINT": "http://103.163.97.35:8080/ords/cpabank_ws/cpa/payment/spyTransactions",
-  "SMS_ENDPOINT": "http://localhost:9090/api/sms/send",
-  "EMAIL_ENDPOINT": "http://localhost:9090/api/email/send",
-  "CONTROL_SERVER_URL": "http://192.168.1.249:3000",
-  "ENABLE_SMS": false,
-  "ENABLE_EMAIL": true,
-  "ENABLE_MANUAL_MUTE": false,
-  "PHONE_NUMBERS": [
-    "01813543005",
-    "01911268803"
-  ],
-  "EMAIL_ADDRESSES": [
-    "maruf.3666@gmail.com"
-  ],
-  "CHECK_INTERVAL": 60000,
-  "CHECK_INTERVAL_MINUTES": 1
+  "activeEndpointTags": [],
+  "endpointOverrides": {
+    "bank": {
+      "apiEndpoint": "http://192.168.1.154:8076/ords/nts_ws/cpa/payment/spyTransactionFailure",
+      "method": "GET",
+      "authType": "",
+      "authToken": "",
+      "authUsername": "",
+      "authPassword": "",
+      "headers": {},
+      "query": {},
+      "body": {},
+      "mapItemsPath": "items",
+      "mapIdPath": "products_id",
+      "mapTimestampPath": "approval_date",
+      "mapTitlePath": "",
+      "mapDetailsPath": "",
+      "enableSms": false,
+      "enableEmail": true,
+      "enableManualMute": true,
+      "checkInterval": 12000,
+      "phoneNumbers": [],
+      "emailAddresses": [
+        "maruf.3666@gmail.com"
+      ],
+      "smsEndpoint": "http://localhost:9090/api/sms/send",
+      "emailEndpoint": "http://localhost:9090/api/email/send",
+      "tag": "bank",
+      "updatedAt": "2026-01-28T10:11:36.201Z"
+    }
+  },
+  "globalSettings": {}
 }

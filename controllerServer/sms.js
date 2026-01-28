@@ -1,31 +1,46 @@
 const axios = require('axios');
 const { getConfig } = require('./config-store');
+const consoleLog = require('./console-logger');
 
 /**
- * Send SMS notification to multiple phone numbers
- * @param {Array} phoneNumbers - List of phone numbers
+ * Send SMS notification to phone number(s)
+ * @param {string} phoneNumber - Single phone number to send to
  * @param {string} message - Message text to send
+ * @param {string} [smsEndpoint] - Optional SMS endpoint URL. If not provided, uses config
  */
-async function sendSMS(phoneNumbers, message) {
+async function sendSMS(phoneNumber, message, smsEndpoint) {
   try {
     const config = getConfig();
-    const { SMS_ENDPOINT } = config;
-    const recipients = phoneNumbers && phoneNumbers.length ? phoneNumbers : config.PHONE_NUMBERS;
-    const phoneNumbersString = recipients.join(',');
+    
+    // Use provided endpoint or fall back to config
+    const endpoint = smsEndpoint || config.SMS_ENDPOINT;
+    
+    if (!endpoint) {
+      consoleLog.error('SMS endpoint not configured', 'SMS');
+      throw new Error('SMS endpoint not configured');
+    }
+    
     const encodedMessage = encodeURIComponent(message);
+    const url = `${endpoint}?to=${phoneNumber}&text=${encodedMessage}`;
     
-    const url = `${SMS_ENDPOINT}?to=${phoneNumbersString}&text=${encodedMessage}`;
+    // Prepare headers with API key if configured
+    const headers = {};
+    const apiKey = process.env.GATEWAY_API_KEY;
+    if (apiKey) {
+      headers['X-API-Key'] = apiKey;
+    }
     
-    const response = await axios.get(url);
+    consoleLog.debug(`Sending SMS to ${phoneNumber} via ${endpoint}`, 'SMS');
+    const response = await axios.get(url, { headers });
     
-    console.log(`[${new Date().toISOString()}] SMS sent successfully to ${phoneNumbersString}`);
-    console.log('SMS Response:', response.data);
+    consoleLog.debug(`SMS sent successfully to ${phoneNumber}`, 'SMS');
+    consoleLog.debug(`SMS Response: ${JSON.stringify(response.data)}`, 'SMS');
     
     return response.data;
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] Error sending SMS:`, error.message);
+    consoleLog.error(`Error sending SMS to ${phoneNumber}: ${error.message}`, 'SMS', error);
     if (error.response) {
-      console.error('SMS API Response:', error.response.data);
+      consoleLog.error(`SMS API Response: ${JSON.stringify(error.response.data)}`, 'SMS');
     }
     throw error;
   }
