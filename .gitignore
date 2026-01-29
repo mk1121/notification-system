@@ -1,1 +1,3 @@
 .env
+controllerServer/config-state.json
+controllerServer/notification-state.json

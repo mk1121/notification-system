@@ -1645,53 +1645,53 @@ Check these resources:
 4. **[TESTING.md](./TESTING.md)** - Test help
 5. **Tests** - See `tests/` folder for examples
 
-## বাংলা সাহায্য
+## English Help
 
-### সাধারণ সমস্যা
+### Common Problems
 
-**সার্ভার চলছে না:**
+**Server not running:**
 ```bash
-# চেক করুন চলছে কিনা
+# Check if running
 curl http://localhost:3000/
 curl http://localhost:9090/
 
-# ফোর্স রিস্টার্ট
+# Force restart
 pkill -f "npm start"
 sleep 3
 npm start
 ```
 
-**লগইন করতে পারছি না:**
+**Can't login:**
 ```bash
-# ডিফল্ট রিসেট করুন
+# Reset to default
 cd controllerServer
 echo '{"admin":{"username":"admin","password":"admin123"}}' > users.json
 ```
 
-**Endpoint কাজ করছে না:**
+**Endpoint not working:**
 ```bash
-# চেক করুন
+# Check
 curl http://localhost:3000/api/endpoints
 
-# এন্ডপয়েন্ট যোগ করুন
-# UI এ গিয়ে: http://localhost:3000/setup/ui
+# Add endpoint
+# Go to UI: http://localhost:3000/setup/ui
 ```
 
-**API Key ম্যাচ করছে না:**
+**API Key doesn't match:**
 ```bash
-# দুটো ফাইল একই রাখুন
+# Keep both files the same
 grep GATEWAY_API_KEY .env
 grep API_KEY email-sms-gateway/.env
 
-# একই হওয়া উচিত
+# Should be identical
 ```
 
-**SMS/Email যাচ্ছে না:**
+**SMS/Email not sending:**
 ```bash
-# গেটওয়ে চেক করুন
+# Check gateway
 curl http://localhost:9090/
 
-# Kill switch চেক করুন
+# Check kill switch
 curl http://localhost:9090/api/admin/kill-switch \
   -H "X-API-Key: your-api-key"
 ```

@@ -4,8 +4,7 @@ const { fetchTransactions, mapItemsFromData } = require('./api');
 const { sendSMS } = require('./sms');
 const { sendEmail } = require('./email');
 const { getConfig } = require('./config-store');
-const { getEndpointConfig, getActiveTags, getAvailableTags } = require('./endpoints-store');
-const { CHECK_INTERVAL: DEFAULT_CHECK_INTERVAL } = require('./config');
+const { getEndpointConfig, getActiveTags } = require('./endpoints-store');
 const { logSmsSent, logEmailSent, logApiFailure, logApiRecovery, logAutoUnmute, log } = require('./logger');
 const consoleLog = require('./console-logger');
 
@@ -48,8 +47,8 @@ function saveState(state) {
  */
 async function checkAndNotifyEndpoint(endpointTag) {
   try {
-    consoleLog.debug(`Starting transaction check`, endpointTag);
-    
+    consoleLog.debug('Starting transaction check', endpointTag);
+
     // ========================================
     // STEP 1: VALIDATE ENDPOINT CONFIGURATION
     // ========================================
@@ -64,45 +63,43 @@ async function checkAndNotifyEndpoint(endpointTag) {
 
     // Validate required config fields
     if (!endpointConfig.apiEndpoint) {
-      consoleLog.error(`Missing API endpoint in configuration`, endpointTag);
+      consoleLog.error('Missing API endpoint in configuration', endpointTag);
       log('SYSTEM', `[${endpointTag}] Configuration error: Missing API endpoint`);
       return;
     }
 
-    const { 
-      apiEndpoint,
-      smsEndpoint, 
-      emailEndpoint, 
-      phoneNumbers = [], 
-      emailAddresses = [], 
-      enableSms = false, 
-      enableEmail = false, 
-      enableManualMute = false,
+    const {
+      smsEndpoint,
+      emailEndpoint,
+      phoneNumbers = [],
+      emailAddresses = [],
+      enableSms = false,
+      enableEmail = false,
       enableRecoveryEmail = false
     } = endpointConfig;
 
     // Validate notification channels are configured
-    const notificationChannelsConfigured = 
+    const notificationChannelsConfigured =
       (enableSms && phoneNumbers.length > 0 && smsEndpoint) ||
       (enableEmail && emailAddresses.length > 0 && emailEndpoint);
-    
+
     if (!notificationChannelsConfigured) {
-      consoleLog.warn(`No notification channels configured (SMS/Email disabled or missing recipients)`, endpointTag);
+      consoleLog.warn('No notification channels configured (SMS/Email disabled or missing recipients)', endpointTag);
       log('SYSTEM', `[${endpointTag}] Warning: No notification channels configured`);
       return;
     }
 
-    consoleLog.debug(`Endpoint configuration validated`, endpointTag);
-    
+    consoleLog.debug('Endpoint configuration validated', endpointTag);
+
     // ========================================
     // STEP 2: FETCH AND MAP DATA
     // ========================================
     const result = await fetchTransactions(endpointConfig);
-    
+
     if (!result.ok) {
       consoleLog.error(`API failure detected: ${result.error || 'Unknown error'}`, endpointTag);
       logApiFailure(`[${endpointTag}] ${result.error || 'Unknown error'}`, result.status);
-      
+
       // Handle API failure notification
       await handleApiFailure(endpointTag, endpointConfig, result);
       return;
@@ -129,10 +126,10 @@ async function checkAndNotifyEndpoint(endpointTag) {
     }
 
     const endpointState = state.endpoints[endpointTag];
-    
+
     // Handle API recovery
     if (endpointState.lastApiStatus === 'failure') {
-      consoleLog.success(`API recovered!`, endpointTag);
+      consoleLog.success('API recovered!', endpointTag);
       endpointState.lastApiStatus = 'success';
       endpointState.lastFailureMessage = '';
       saveState(state);
@@ -151,11 +148,11 @@ async function checkAndNotifyEndpoint(endpointTag) {
     // ========================================
     // STEP 4: CHECK MUTE/UNMUTE STATUS
     // ========================================
-    consoleLog.debug(`Checking mute status`, endpointTag);
+    consoleLog.debug('Checking mute status', endpointTag);
 
     // Check if there are new item IDs (not in mutedPaymentIds)
     const newPaymentIds = items.filter(item => !endpointState.mutedPaymentIds.includes(item.id)).map(item => item.id);
-    
+
     // Auto-unmute if new item(s) detected
     if (endpointState.mutePayment && newPaymentIds.length > 0) {
       console.log(`[${endpointTag}] New item(s) detected (${newPaymentIds.join(', ')}). Auto-unmuting.`);
@@ -168,7 +165,7 @@ async function checkAndNotifyEndpoint(endpointTag) {
     // Check for mute expiry
     if (endpointState.mutePayment && endpointState.mutePaymentUntil) {
       if (new Date() > new Date(endpointState.mutePaymentUntil)) {
-        consoleLog.info(`Mute timer expired. Auto-unmuting.`, endpointTag, true);
+        consoleLog.info('Mute timer expired. Auto-unmuting.', endpointTag, true);
         endpointState.mutePayment = false;
         endpointState.mutedPaymentIds = [];
         delete endpointState.mutePaymentUntil;
@@ -179,11 +176,11 @@ async function checkAndNotifyEndpoint(endpointTag) {
 
     // If still muted, skip notifications
     if (endpointState.mutePayment) {
-      consoleLog.debug(`Notifications muted. Skipping send.`, endpointTag);
+      consoleLog.debug('Notifications muted. Skipping send.', endpointTag);
       return;
     }
 
-    consoleLog.debug(`Mute checks passed`, endpointTag);
+    consoleLog.debug('Mute checks passed', endpointTag);
 
     // ========================================
     // STEP 5: FILTER ITEMS FOR NOTIFICATION
@@ -191,7 +188,7 @@ async function checkAndNotifyEndpoint(endpointTag) {
     const paymentsToNotify = items.filter(item => !endpointState.mutedPaymentIds.includes(item.id));
 
     if (paymentsToNotify.length === 0) {
-      consoleLog.debug(`No new items to notify`, endpointTag);
+      consoleLog.debug('No new items to notify', endpointTag);
       return;
     }
 
@@ -202,7 +199,7 @@ async function checkAndNotifyEndpoint(endpointTag) {
     // ========================================
     const CONTROL_SERVER_URL = require('./config').CONTROL_SERVER_URL;
     const muteLink = `${CONTROL_SERVER_URL}/mute/payment/ui?endpoint=${endpointTag}`;
-    
+
     await sendNotifications(endpointTag, paymentsToNotify, endpointConfig, muteLink);
 
     // ========================================
@@ -217,8 +214,8 @@ async function checkAndNotifyEndpoint(endpointTag) {
       }
     });
     saveState(state);
-    
-    consoleLog.debug(`Notifications sent successfully`, endpointTag);
+
+    consoleLog.debug('Notifications sent successfully', endpointTag);
 
     // ========================================
     // STEP 8: RESCHEDULE WITH CURRENT INTERVAL
@@ -229,7 +226,7 @@ async function checkAndNotifyEndpoint(endpointTag) {
   } catch (err) {
     consoleLog.error(`Error in checkAndNotifyEndpoint: ${err.message}`, endpointTag, err);
     log('SYSTEM', `[${endpointTag}] Error: ${err.message}`);
-    
+
     // Even on error, reschedule the check
     rescheduleEndpointCheck(endpointTag);
   }
@@ -241,14 +238,14 @@ async function checkAndNotifyEndpoint(endpointTag) {
 async function handleApiFailure(endpointTag, endpointConfig, result) {
   const state = loadState();
   const endpointState = state.endpoints[endpointTag];
-  
+
   endpointState.lastApiStatus = 'failure';
   endpointState.lastFailureMessage = result.error || `HTTP ${result.status || 'N/A'}`;
   saveState(state);
 
-  const { enableManualMute, enableSms, phoneNumbers = [], enableEmail, emailAddresses = [], smsEndpoint, emailEndpoint, apiEndpoint } = endpointConfig;
+  const { enableManualMute, enableSms, phoneNumbers = [], enableEmail, emailAddresses = [], smsEndpoint, emailEndpoint } = endpointConfig;
   const CONTROL_SERVER_URL = require('./config').CONTROL_SERVER_URL;
-  
+
   if (endpointState.muteApi) {
     console.log(`[${endpointTag}] API alerts muted. Skipping failure notification.`);
     return;
@@ -256,7 +253,7 @@ async function handleApiFailure(endpointTag, endpointConfig, result) {
 
   const muteLink = `${CONTROL_SERVER_URL}/mute/api?endpoint=${endpointTag}`;
   const bodyText = `[${endpointTag}] API failure detected. Status: ${result.status || 'N/A'}. Error: ${endpointState.lastFailureMessage}.`;
-  
+
   const bodyHtml = `
     <!DOCTYPE html>
     <html>
@@ -404,7 +401,7 @@ async function sendNotifications(endpointTag, paymentsToNotify, endpointConfig, 
       }
     }
   } else {
-    consoleLog.debug(`SMS not sent - SMS disabled or no recipients`, endpointTag);
+    consoleLog.debug('SMS not sent - SMS disabled or no recipients', endpointTag);
   }
 
   // Send Email
@@ -420,7 +417,7 @@ async function sendNotifications(endpointTag, paymentsToNotify, endpointConfig, 
       }
     }
   } else {
-    consoleLog.debug(`Email not sent - Email disabled or no recipients`, endpointTag);
+    consoleLog.debug('Email not sent - Email disabled or no recipients', endpointTag);
   }
 }
 
@@ -459,7 +456,7 @@ async function sendNotifications(endpointTag, paymentsToNotify, endpointConfig, 
           </body>
           </html>
         `;
-        
+
         for (const email of emailAddresses) {
           await sendEmail(email, subject, bodyText, bodyHtml, emailEndpoint);
           logEmailSent(email, `[${endpointTag}] API recovery notification`);
@@ -478,7 +475,7 @@ async function sendNotifications(endpointTag, paymentsToNotify, endpointConfig, 
 
     // Check if there are new item IDs (not in mutedPaymentIds)
     const newPaymentIds = items.filter(item => !endpointState.mutedPaymentIds.includes(item.id)).map(item => item.id);
-    
+
     // Auto-unmute if new item(s) detected
     if (endpointState.mutePayment && newPaymentIds.length > 0) {
       console.log(`[${endpointTag}] New item(s) detected (${newPaymentIds.join(', ')}). Auto-unmuting.`);
@@ -697,9 +694,9 @@ async function checkAndNotify() {
       if (!ENABLE_EMAIL) {
         console.log(`[${new Date().toISOString()}] Email alerts disabled. Skipping recovery email.`);
       } else {
-      const recoverySubject = '✓ API RECOVERED';
-      const recoveryBody = `[${configTag}] API recovered at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })}. Previous error: ${state.lastFailureMessage || 'N/A'}.`;
-      const recoveryHtml = `
+        const recoverySubject = '✓ API RECOVERED';
+        const recoveryBody = `[${configTag}] API recovered at ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' })}. Previous error: ${state.lastFailureMessage || 'N/A'}.`;
+        const recoveryHtml = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -733,9 +730,9 @@ async function checkAndNotify() {
         </body>
         </html>
       `;
-      logApiRecovery();
-      logEmailSent(EMAIL_ADDRESSES, recoverySubject);
-      await sendEmail(EMAIL_ADDRESSES, recoverySubject, recoveryBody, recoveryHtml);
+        logApiRecovery();
+        logEmailSent(EMAIL_ADDRESSES, recoverySubject);
+        await sendEmail(EMAIL_ADDRESSES, recoverySubject, recoveryBody, recoveryHtml);
       }
     }
     state.lastApiStatus = 'success';
@@ -886,19 +883,19 @@ const activeIntervals = new Map();
  */
 function startScheduler() {
   console.log(`\n[${new Date().toISOString()}] ========================================`);
-  console.log(`Multi-Endpoint Notification System Started`);
-  console.log(`========================================\n`);
-  
+  console.log('Multi-Endpoint Notification System Started');
+  console.log('========================================\n');
+
   const activeTags = getActiveTags();
-  
+
   if (activeTags.length === 0) {
-    console.log(`⚠️  No active endpoints configured!`);
-    console.log(`   Activate an endpoint at: http://localhost:3000/endpoints/ui\n`);
+    console.log('⚠️  No active endpoints configured!');
+    console.log('   Activate an endpoint at: http://localhost:3000/endpoints/ui\n');
     return;
   }
-  
+
   console.log(`📋 Found ${activeTags.length} active endpoint(s): ${activeTags.join(', ')}\n`);
-  
+
   // Start scheduler for each active endpoint
   for (const tag of activeTags) {
     try {
@@ -907,8 +904,8 @@ function startScheduler() {
       console.error(`❌ Failed to start scheduler for '${tag}': ${err.message}`);
     }
   }
-  
-  console.log(`\n✅ All endpoint schedulers started successfully!\n`);
+
+  console.log('\n✅ All endpoint schedulers started successfully!\n');
 }
 
 /**
@@ -920,22 +917,20 @@ function rescheduleEndpointCheck(endpointTag) {
   try {
     const config = getEndpointConfig(endpointTag);
     const currentInterval = config.checkInterval || 30000;
-    
     if (activeIntervals.has(endpointTag)) {
-      const existingInterval = activeIntervals.get(endpointTag);
       // If interval changed in config, reschedule
       const storedInterval = activeIntervals.get(`${endpointTag}_interval`);
-      
+
       if (storedInterval !== currentInterval) {
         console.log(`[${endpointTag}] ⚙️  Interval changed: ${storedInterval || 30000}ms → ${currentInterval}ms`);
         stopEndpointScheduler(endpointTag);
         activeIntervals.set(`${endpointTag}_interval`, currentInterval);
-        
+
         // Set new interval
         const newIntervalId = setInterval(() => {
           checkAndNotifyEndpoint(endpointTag);
         }, currentInterval);
-        
+
         activeIntervals.set(endpointTag, newIntervalId);
         console.log(`[${endpointTag}] ✓ Scheduler rescheduled with new interval: ${currentInterval / 1000}s`);
       }
@@ -952,30 +947,30 @@ function rescheduleEndpointCheck(endpointTag) {
 function startEndpointScheduler(endpointTag) {
   // Stop existing scheduler if running
   stopEndpointScheduler(endpointTag);
-  
+
   try {
     const config = getEndpointConfig(endpointTag);
     const interval = config.checkInterval || 30000;
-    
+
     console.log(`🚀 Starting scheduler for: ${endpointTag}`);
     console.log(`   API: ${config.apiEndpoint || 'Not set'}`);
     console.log(`   Interval: ${interval / 1000}s (${interval / 60000} minutes)`);
     console.log(`   SMS: ${config.enableSms ? '✓' : '✗'} | Email: ${config.enableEmail ? '✓' : '✗'}`);
     console.log(`   Recipients: ${(config.phoneNumbers || []).length} SMS, ${(config.emailAddresses || []).length} Email\n`);
-    
+
     // Store the initial interval for comparison in reschedule
     activeIntervals.set(`${endpointTag}_interval`, interval);
-    
+
     // Run check immediately
     checkAndNotifyEndpoint(endpointTag);
-    
+
     // Schedule recurring checks
     const intervalId = setInterval(() => {
       checkAndNotifyEndpoint(endpointTag);
     }, interval);
-    
+
     activeIntervals.set(endpointTag, intervalId);
-    
+
   } catch (err) {
     console.error(`❌ Error starting scheduler for '${endpointTag}': ${err.message}`);
   }
@@ -1003,13 +998,13 @@ function stopEndpointScheduler(endpointTag) {
  * Stop all schedulers
  */
 function stopAllSchedulers() {
-  console.log(`\n⏹️  Stopping all schedulers...`);
+  console.log('\n⏹️  Stopping all schedulers...');
   for (const [tag, intervalId] of activeIntervals) {
     clearInterval(intervalId);
     console.log(`   Stopped: ${tag}`);
   }
   activeIntervals.clear();
-  console.log(`✅ All schedulers stopped\n`);
+  console.log('✅ All schedulers stopped\n');
 }
 
 /**
@@ -1027,7 +1022,7 @@ function restartEndpointScheduler(endpointTag) {
  */
 function getActiveSchedulers() {
   const schedulers = [];
-  for (const [tag, intervalId] of activeIntervals) {
+  for (const tag of activeIntervals.keys()) {
     try {
       const config = getEndpointConfig(tag);
       schedulers.push({

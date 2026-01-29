@@ -40,7 +40,7 @@ function buildRequestConfig(customConfig = null) {
     url: endpoint,
     method: httpMethod,
     headers: reqHeaders,
-    params,
+    params
   };
 
   if (httpMethod !== 'GET') {
@@ -105,7 +105,7 @@ function getPath(obj, path) {
   });
   let cur = obj;
   for (const key of tokens) {
-    if (cur == null) return undefined;
+    if (cur === null || cur === undefined) return undefined;
     cur = cur[key];
   }
   return cur;

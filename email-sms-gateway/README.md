@@ -1,13 +1,37 @@
-# Teletalk SMS Gateway - Node.js Version
+# Teletalk SMS & Email Gateway - Node.js Version
 
-Node.js implementation of the Teletalk SMS Gateway API.
+Node.js implementation of the Teletalk SMS Gateway API, with support for email notifications and advanced gateway controls.
+
+---
+
+## 📋 Index
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Running the Server](#running-the-server)
+- [API Endpoints](#api-endpoints)
+- [Testing](#testing-with-specific-number)
+- [Project Structure](#project-structure)
+- [Response Format](#response-format)
+- [Security Notes](#security-notes)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Authentication Guide](#authentication-guide)
+- [Kill Switch Guide](#kill-switch-guide)
+
+---
 
 ## Features
 
 - ✅ Send SMS to specific numbers
+- ✅ Send Email notifications (see API docs)
 - ✅ Check account balance
 - ✅ REST API endpoints
-- ✅ Easy testing with test script 
+- ✅ API Key authentication (see [Authentication Guide](docs/AUTHENTICATION.md))
+- ✅ Emergency kill switch for SMS/Email (see [Kill Switch Guide](docs/KILL_SWITCH.md))
+- ✅ Easy testing with test script
 - ✅ Environment-based configuration
 
 ## Prerequisites
@@ -77,135 +101,69 @@ Parameters:
 GET http://localhost:9090/api/sms/balance
 ```
 
+### 4. Send Email (see API docs)
+```
+POST http://localhost:9090/api/email/send
+```
+
 ## Testing with Specific Number
 
-### Method 1: Using Test Script
-
-1. Edit `test-send.js` and change the TEST_NUMBER:
-```javascript
-const TEST_NUMBER = '01700000000';  // Your test number
-const TEST_MESSAGE = 'Test SMS from Node.js Gateway';
-```
-
-2. Run the test:
-```bash
-npm test
-```
-
-OR
-
-```bash
-node test-send.js
-```
-
-### Method 2: Using Browser
-
-Start the server and open:
-```
-http://localhost:9090/api/sms/send?to=01700000000&text=Test%20Message
-```
-
-### Method 3: Using cURL
-
-```bash
-# Send SMS
-curl "http://localhost:9090/api/sms/send?to=01700000000&text=Test%20Message"
-
-# Check Balance
-curl "http://localhost:9090/api/sms/balance"
-```
-
-### Method 4: Using Direct Client
-
-Create your own test file:
-
-```javascript
-const TeletalkSmsClient = require('./teletalkClient');
-
-const client = new TeletalkSmsClient({
-    user: 'CPAbankINT',
-    userId: 11323,
-    encrKey: '@***',
-    password: 'CPA@bank$api!2025',
-    baseUrl: 'https://bulksms.teletalk.com.bd/jlinktbls.php'
-});
-
-async function sendTestSms() {
-    try {
-        const response = await client.sendSms('01700000000', 'Test Message');
-        console.log('Success:', response);
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
-sendTestSms();
-```
+...existing code...
 
 ## Project Structure
 
-```
-nodejs-sms-gateway/
-├── package.json          # Dependencies and scripts
-├── .env                  # Configuration (credentials)
-├── server.js            # Express server with REST API
-├── teletalkClient.js    # Teletalk SMS client implementation
-├── test-send.js         # Test script for sending SMS
-└── README.md            # This file
-```
+...existing code...
 
 ## Response Format
 
-### Success Response:
-```json
-{
-  "status": "OK",
-  "providerResponse": "..." 
-}
-```
-
-### Error Response:
-```json
-{
-  "status": "ERROR",
-  "providerResponse": "Error message"
-}
-```
+...existing code...
 
 ## Security Notes
 
-⚠️ **Important**: 
-- Never commit the `.env` file to version control
-- Keep your credentials secure
-- Use environment variables in production
-- Add `.env` to your `.gitignore` file
+...existing code...
 
 ## Troubleshooting
 
-### Port already in use:
-Change the PORT in `.env` file:
-```env
-PORT=9091
-```
-
-### Connection timeout:
-- Check your internet connection
-- Verify the Teletalk base URL is correct
-- Ensure firewall allows outgoing HTTPS connections
-
-### Invalid credentials:
-- Double-check your credentials in `.env`
-- Ensure USER_ID is a number
-- Verify password is correct
+...existing code...
 
 ## Development
 
-To add new features or modify the code:
+...existing code...
 
-1. `teletalkClient.js` - Core SMS client logic
-2. `server.js` - REST API endpoints
-3. `test-send.js` - Test scenarios
+---
+
+## Authentication Guide
+
+See [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) for:
+- How to enable and configure API Key authentication
+- Required headers for all protected endpoints
+- Security best practices and troubleshooting
+
+**Summary:**
+- All SMS and Email endpoints can be protected with an API key
+- Add `API_KEY` to your `.env` file
+- Use `X-API-Key` or `Authorization: Bearer` header in requests
+- See the full guide for error handling and security tips
+
+---
+
+## Kill Switch Guide
+
+See [docs/KILL_SWITCH.md](docs/KILL_SWITCH.md) for:
+- How to instantly disable SMS and/or Email services
+- API and environment variable controls
+- Example cURL commands for toggling services
+- Error responses and best practices
+
+**Summary:**
+- Use the kill switch to stop all notifications in emergencies
+- Control via API or environment variables
+- Check status and logs for current state
+- See the full guide for advanced usage
+
+---
 
 ## License
 
 ISC
+

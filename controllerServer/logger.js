@@ -39,11 +39,11 @@ function initializeLog() {
 function log(type, message) {
   initializeLog();
   const timestamp = getTimestamp();
-  
+
   // Extract tag from message - look for [tag] pattern anywhere in the message
   let tag = '';
   let cleanMessage = message;
-  
+
   // First try: tag at the start "[tag] message"
   let tagMatch = message.match(/^\[([^\]]+)\]\s*(.*)/);
   if (tagMatch) {
@@ -57,7 +57,7 @@ function log(type, message) {
       // Don't remove it from cleanMessage for the second case, as it's part of the content
     }
   }
-  
+
   // Format: [timestamp] [type] [tag] message
   let logEntry;
   if (tag) {
@@ -65,7 +65,7 @@ function log(type, message) {
   } else {
     logEntry = `[${timestamp}] [${type}] ${cleanMessage}\n`;
   }
-  
+
   fs.appendFileSync(logFile, logEntry);
   consoleLog.debug(logEntry.trim(), 'NOTIFY');
 }
@@ -159,7 +159,7 @@ function getLogsJSON(lines = 50, type = null) {
     }
     const content = fs.readFileSync(logFile, 'utf8');
     const logLines = content.split('\n').filter(line => line.trim() && line.includes('['));
-    
+
     const logs = logLines.map(line => {
       // Format: [timestamp] [type] [tag] message OR [timestamp] [type] message
       const match = line.match(/\[([^\]]+)\]\s*\[([^\]]+)\]\s*(?:\[([^\]]+)\]\s+)?(.*)/);

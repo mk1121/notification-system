@@ -19,7 +19,7 @@
       "enableSms": false,
       "enableEmail": true,
       "enableManualMute": true,
-      "checkInterval": 12000,
+      "checkInterval": 60000,
       "phoneNumbers": [],
       "emailAddresses": [
         "maruf.3666@gmail.com"
@@ -27,7 +27,7 @@
       "smsEndpoint": "http://localhost:9090/api/sms/send",
       "emailEndpoint": "http://localhost:9090/api/email/send",
       "tag": "bank",
-      "updatedAt": "2026-01-28T10:11:36.201Z"
+      "updatedAt": "2026-01-29T04:46:36.948Z"
     }
   },
   "globalSettings": {}

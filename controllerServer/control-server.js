@@ -1,11 +1,11 @@
-  const express = require('express');
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { CONTROL_SERVER_PORT } = require('./config');
 const { fetchTransactions, mapItemsFromData } = require('./api');
-const { getConfig, setConfig, createConfig, getConfigByTag, updateConfigByTag, deleteConfigByTag, listConfigs, getActiveConfigTag, setActiveConfigTag, getMultiConfigs } = require('./config-store');
+const { getConfig, setConfig, createConfig, getConfigByTag, updateConfigByTag, deleteConfigByTag, listConfigs, getActiveConfigTag, setActiveConfigTag } = require('./config-store');
 const { logMuteAction, logUnmuteAction, getLogs, getLogsJSON, clearLogs } = require('./logger');
-const { getEndpointConfig, getAllEndpoints, getActiveTags, getActiveTag, setActiveTags, setActiveTag, addActiveTag, removeActiveTag, toggleActiveTag, getActiveEndpoint, updateEndpoint, resetEndpoint, endpointExists, getAvailableTags } = require('./endpoints-store');
+const { getEndpointConfig, getAllEndpoints, getActiveTags, getActiveTag, setActiveTags, setActiveTag, addActiveTag, removeActiveTag, toggleActiveTag, getActiveEndpoint, updateEndpoint, resetEndpoint, getAvailableTags } = require('./endpoints-store');
 const { startEndpointScheduler, stopEndpointScheduler, restartEndpointScheduler, getActiveSchedulers } = require('./scheduler');
 const consoleLog = require('./console-logger');
 
@@ -194,22 +194,6 @@ app.get('/login', (_req, res) => {
         .error.show {
           display: block;
         }
-        .demo-info {
-          background: #e7f3ff;
-          border-left: 4px solid #0066cc;
-          padding: 12px;
-          border-radius: 4px;
-          margin-top: 20px;
-          font-size: 12px;
-          color: #0066cc;
-        }
-        .demo-info strong {
-          display: block;
-          margin-bottom: 6px;
-        }
-        .demo-info div {
-          margin: 4px 0;
-        }
       </style>
     </head>
     <body>
@@ -233,12 +217,6 @@ app.get('/login', (_req, res) => {
           
           <button type="submit">Sign In</button>
         </form>
-        
-        <div class="demo-info">
-          <strong>Demo Credentials:</strong>
-          <div>👤 admin / admin123</div>
-          <div>👤 user / user123</div>
-        </div>
       </div>
       
       <script>
@@ -278,16 +256,16 @@ app.get('/login', (_req, res) => {
 // Login endpoint
 app.post('/auth/login', (req, res) => {
   const { username, password } = req.body;
-  
+
   const user = verifyCredentials(username, password);
   if (!user) {
     return res.status(401).json({ ok: false, error: 'Invalid credentials' });
   }
-  
+
   // Create session
   const sessionId = Math.random().toString(36).substr(2, 9);
   sessions[sessionId] = { username, loginTime: new Date() };
-  
+
   // Set cookie
   res.setHeader('Set-Cookie', `sessionId=${sessionId}; Path=/; HttpOnly`);
   res.json({ ok: true, message: 'Login successful' });
@@ -459,7 +437,7 @@ app.get('/mute/payment/ui', (_req, res) => {
 app.get('/mute/payment', async (_req, res) => {
   const endpointTag = _req.query.endpoint || null;
   const state = loadState();
-  
+
   // Get endpoint config to check if manual mute is enabled
   let enableManualMute = false;
   if (endpointTag) {
@@ -473,7 +451,7 @@ app.get('/mute/payment', async (_req, res) => {
     const config = getConfig();
     enableManualMute = config.ENABLE_MANUAL_MUTE;
   }
-  
+
   if (!enableManualMute) {
     res.type('text/html').send(`
       <!DOCTYPE html>
@@ -484,10 +462,10 @@ app.get('/mute/payment', async (_req, res) => {
     `);
     return;
   }
-  
+
   const minutes = parseInt(_req.query.minutes) || 30;
   const muteUntil = new Date(Date.now() + minutes * 60 * 1000);
-  
+
   if (endpointTag) {
     // Endpoint-specific mute
     // Initialize endpoint state if it doesn't exist
@@ -507,35 +485,35 @@ app.get('/mute/payment', async (_req, res) => {
     const endpointState = state.endpoints[endpointTag];
     endpointState.mutePayment = true;
     endpointState.mutePaymentUntil = muteUntil.toISOString();
-    
+
     // Get current payment IDs from latest check and add to mutedPaymentIds
     if (!endpointState.mutedPaymentIds) {
       endpointState.mutedPaymentIds = [];
     }
-    
+
     // Fetch current payments to mute
     const { fetchTransactions, mapItemsFromData } = require('./api');
     const endpointConfig = getEndpointConfig(endpointTag);
-    
+
     try {
       const result = await fetchTransactions(endpointConfig);
       if (result.ok) {
         const items = mapItemsFromData(result.data, endpointConfig);
         const currentPaymentIds = items.map(item => item.id);
-        
+
         // Add current payment IDs to muted list
         currentPaymentIds.forEach(id => {
           if (!endpointState.mutedPaymentIds.includes(id)) {
             endpointState.mutedPaymentIds.push(id);
           }
         });
-        
+
         console.log(`[${endpointTag}] Muted ${currentPaymentIds.length} payment IDs: ${currentPaymentIds.join(', ')}`);
       }
     } catch (err) {
       console.error(`Failed to fetch payments for mute: ${err.message}`);
     }
-    
+
     saveState(state);
     logMuteAction(`[${endpointTag}] payment (${minutes} minutes)`);
   } else {
@@ -545,7 +523,7 @@ app.get('/mute/payment', async (_req, res) => {
     saveState(state);
     logMuteAction(`payment (${minutes} minutes)`);
   }
-  
+
   res.type('text/html').send(`
     <!DOCTYPE html>
     <html>
@@ -1105,7 +1083,7 @@ app.post('/api/test-fetch-custom', async (req, res) => {
     }
 
     const axios = require('axios');
-    
+
     const config = {
       url: apiEndpoint,
       method: apiMethod.toUpperCase(),
@@ -1127,7 +1105,7 @@ app.post('/api/test-fetch-custom', async (req, res) => {
     }
 
     const response = await axios(config);
-    
+
     res.json({
       ok: true,
       status: response.status,
@@ -1168,7 +1146,7 @@ app.post('/api/test-map-custom', async (req, res) => {
     }
 
     const axios = require('axios');
-    
+
     const config = {
       url: apiEndpoint,
       method: apiMethod.toUpperCase(),
@@ -1200,7 +1178,7 @@ app.post('/api/test-map-custom', async (req, res) => {
 
     let items = [];
     const itemsArray = getNestedValue(data, mapItemsPath) || data;
-    
+
     if (Array.isArray(itemsArray)) {
       items = itemsArray.map(item => {
         const mapped = {
@@ -1249,21 +1227,21 @@ app.get('/api/configs', (_req, res) => {
 app.post('/api/configs', (req, res) => {
   const { tag, data } = req.body || {};
   if (!tag) return res.status(400).json({ ok: false, error: 'Tag required' });
-  
+
   try {
     // Save to both old and new stores for compatibility
     const result = createConfig(tag, data || {});
-    
+
     // Also save to endpoints-store
     updateEndpoint(tag, data || {});
-    
+
     // Start scheduler for new endpoint
     try {
       startEndpointScheduler(tag);
     } catch (err) {
       console.warn(`Could not start scheduler for ${tag}: ${err.message}`);
     }
-    
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
@@ -1279,17 +1257,17 @@ app.get('/api/configs/:tag', (req, res) => {
 app.put('/api/configs/:tag', (req, res) => {
   try {
     const result = updateConfigByTag(req.params.tag, req.body || {});
-    
+
     // Also update endpoints-store
     updateEndpoint(req.params.tag, req.body || {});
-    
+
     // Restart scheduler for updated endpoint
     try {
       restartEndpointScheduler(req.params.tag);
     } catch (err) {
       console.warn(`Could not restart scheduler for ${req.params.tag}: ${err.message}`);
     }
-    
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
@@ -1299,21 +1277,21 @@ app.put('/api/configs/:tag', (req, res) => {
 app.delete('/api/configs/:tag', (req, res) => {
   try {
     const result = deleteConfigByTag(req.params.tag);
-    
+
     // Also delete from endpoints-store
     try {
       resetEndpoint(req.params.tag);
     } catch (err) {
       // Endpoint might not exist in endpoints-store
     }
-    
+
     // Stop scheduler
     try {
       stopEndpointScheduler(req.params.tag);
     } catch (err) {
       console.warn(`Could not stop scheduler for ${req.params.tag}: ${err.message}`);
     }
-    
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
@@ -1323,14 +1301,14 @@ app.delete('/api/configs/:tag', (req, res) => {
 app.post('/api/configs/:tag/activate', (req, res) => {
   try {
     const result = setActiveConfigTag(req.params.tag);
-    
+
     // Also set in endpoints-store
     try {
       setActiveTag(req.params.tag);
     } catch (err) {
       console.warn(`Could not set active tag in endpoints-store: ${err.message}`);
     }
-    
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
@@ -1359,17 +1337,17 @@ app.get('/api/endpoints/active', (req, res) => {
 app.post('/api/endpoints/active', (req, res) => {
   try {
     const { tags } = req.body;
-    
+
     if (!Array.isArray(tags)) {
       return res.status(400).json({ ok: false, error: 'tags must be an array' });
     }
-    
+
     const activeTags = setActiveTags(tags);
-    
+
     // Stop old schedulers and start new ones
     const allEndpoints = getAllEndpoints();
     const allTags = Object.keys(allEndpoints);
-    
+
     allTags.forEach(tag => {
       if (activeTags.includes(tag) && !getActiveSchedulers().map(s => s.tag).includes(tag)) {
         // Start scheduler for newly activated tag
@@ -1379,7 +1357,7 @@ app.post('/api/endpoints/active', (req, res) => {
         stopEndpointScheduler(tag);
       }
     });
-    
+
     res.json({
       ok: true,
       activeTags,
@@ -1398,14 +1376,14 @@ app.post('/api/endpoints/:tag/toggle-active', (req, res) => {
     const tag = req.params.tag;
     const newActiveTags = toggleActiveTag(tag);
     const isNowActive = newActiveTags.includes(tag);
-    
+
     // Start or stop scheduler accordingly
     if (isNowActive) {
       startEndpointScheduler(tag);
     } else {
       stopEndpointScheduler(tag);
     }
-    
+
     res.json({
       ok: true,
       tag,
@@ -1425,10 +1403,10 @@ app.post('/api/endpoints/:tag/activate', (req, res) => {
   try {
     const tag = req.params.tag;
     const activeTags = addActiveTag(tag);
-    
+
     // Start scheduler for this endpoint
     startEndpointScheduler(tag);
-    
+
     res.json({
       ok: true,
       tag,
@@ -1447,10 +1425,10 @@ app.post('/api/endpoints/:tag/deactivate', (req, res) => {
   try {
     const tag = req.params.tag;
     const activeTags = removeActiveTag(tag);
-    
+
     // Stop scheduler for this endpoint
     stopEndpointScheduler(tag);
-    
+
     res.json({
       ok: true,
       tag,
@@ -1464,11 +1442,6 @@ app.post('/api/endpoints/:tag/deactivate', (req, res) => {
 
 // Setup UI for multi-config with tag selection
 app.get('/setup/ui', requireLogin, (_req, res) => {
-  const cfg = getConfig();
-  const configs = getMultiConfigs();
-  const activeTag = getActiveConfigTag();
-  const configList = listConfigs();
-  
   res.type('text/html').send(`
     <!DOCTYPE html>
     <html>
@@ -1942,7 +1915,7 @@ app.put('/api/endpoints/:tag', (req, res) => {
 app.post('/api/endpoints/:tag/reset', (req, res) => {
   try {
     const result = resetEndpoint(req.params.tag);
-    
+
     // Stop scheduler if endpoint was deleted
     if (result.deleted) {
       try {
@@ -1952,7 +1925,7 @@ app.post('/api/endpoints/:tag/reset', (req, res) => {
       }
       return res.json({ ok: true, deleted: true, message: result.message });
     }
-    
+
     res.json({ ok: true, tag: req.params.tag, config: result, message: 'Endpoint reset to defaults' });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
@@ -1989,7 +1962,7 @@ app.get('/api/schedulers', (_req, res) => {
   try {
     const schedulers = getActiveSchedulers();
     const activeTags = getActiveTags();
-    
+
     // Compare active tags with running schedulers
     const comparison = {
       activeTagsInConfig: activeTags,
@@ -1999,10 +1972,10 @@ app.get('/api/schedulers', (_req, res) => {
         runningButShouldNot: schedulers.map(s => s.tag).filter(tag => !activeTags.includes(tag))
       }
     };
-    
-    res.json({ 
-      ok: true, 
-      schedulers, 
+
+    res.json({
+      ok: true,
+      schedulers,
       count: schedulers.length,
       comparison
     });
@@ -2025,11 +1998,11 @@ app.post('/api/schedulers/:tag/start', (req, res) => {
 app.post('/api/schedulers/:tag/stop', (req, res) => {
   try {
     const stopped = stopEndpointScheduler(req.params.tag);
-    res.json({ 
-      ok: true, 
+    res.json({
+      ok: true,
       stopped,
-      message: stopped 
-        ? `Scheduler stopped for ${req.params.tag}` 
+      message: stopped
+        ? `Scheduler stopped for ${req.params.tag}`
         : `No active scheduler found for ${req.params.tag}`
     });
   } catch (err) {
@@ -2053,18 +2026,18 @@ app.post('/api/schedulers/cleanup', (req, res) => {
     const schedulers = getActiveSchedulers();
     const activeTags = getActiveTags();
     const runningTags = schedulers.map(s => s.tag);
-    
+
     // Find schedulers that are running but not in active tags
     const shouldStop = runningTags.filter(tag => !activeTags.includes(tag));
-    
+
     if (shouldStop.length === 0) {
-      return res.json({ 
-        ok: true, 
+      return res.json({
+        ok: true,
         message: 'No cleanup needed - all schedulers match active configuration',
         stopped: []
       });
     }
-    
+
     // Stop each scheduler that shouldn't be running
     const stopped = [];
     shouldStop.forEach(tag => {
@@ -2073,9 +2046,9 @@ app.post('/api/schedulers/cleanup', (req, res) => {
         stopped.push(tag);
       }
     });
-    
-    res.json({ 
-      ok: true, 
+
+    res.json({
+      ok: true,
       message: `Stopped ${stopped.length} scheduler(s)`,
       stopped
     });
@@ -2090,9 +2063,9 @@ app.get('/endpoints/ui', requireLogin, (_req, res) => {
     const endpoints = getAllEndpoints();
     const activeTags = getActiveTags();
     const tags = getAvailableTags();
-    
+
     let endpointsHtml = '';
-    
+
     if (tags.length === 0) {
       endpointsHtml = `
         <div style="text-align:center; padding:60px 20px; background:white; border-radius:12px; border:2px dashed #e5e7eb;">
@@ -2129,7 +2102,7 @@ app.get('/endpoints/ui', requireLogin, (_req, res) => {
         `;
       }).join('');
     }
-    
+
     res.type('text/html').send(`
       <!DOCTYPE html>
       <html>

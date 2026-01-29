@@ -1,4 +1,4 @@
-const { startEndpointScheduler, getActiveSchedulers } = require('./scheduler');
+const { startEndpointScheduler } = require('./scheduler');
 const { getActiveTags, getAllEndpoints } = require('./endpoints-store');
 
 /**
@@ -23,15 +23,15 @@ function getDhakaTime() {
 async function main() {
   console.log('=== Notification System (Dhaka) ===');
   console.log(`Started at: ${getDhakaTime()}\n`);
-  
+
   try {
     // Start schedulers for ACTIVE endpoints only
     const activeTags = getActiveTags();
     const allEndpoints = getAllEndpoints();
     const allTags = Object.keys(allEndpoints);
-    
+
     console.log(`📋 Found ${allTags.length} endpoint(s): ${allTags.join(', ')}\n`);
-    
+
     if (activeTags.length > 0) {
       console.log(`🚀 Starting schedulers for ${activeTags.length} ACTIVE endpoint(s)...\n`);
       activeTags.forEach(tag => {
@@ -42,27 +42,27 @@ async function main() {
           console.error(`   ✗ Failed to start scheduler for ${tag}:`, error.message);
         }
       });
-      console.log(`\n✅ All endpoint schedulers started successfully!\n`);
+      console.log('\n✅ All endpoint schedulers started successfully!\n');
     } else {
       if (allTags.length > 0) {
         console.log(`⚠️  No active endpoints configured. Available: ${allTags.join(', ')}`);
-        console.log(`Use /endpoints/ui to activate endpoints\n`);
+        console.log('Use /endpoints/ui to activate endpoints\n');
       } else {
-        console.log(`⚠️  No endpoints configured yet.\n`);
+        console.log('⚠️  No endpoints configured yet.\n');
       }
     }
-    
+
     // Keep the process running
     process.on('SIGINT', () => {
       console.log('\n[SIGINT] Shutting down gracefully...');
       process.exit(0);
     });
-    
+
     process.on('SIGTERM', () => {
       console.log('\n[SIGTERM] Shutting down gracefully...');
       process.exit(0);
     });
-    
+
   } catch (error) {
     console.error('Fatal error:', error);
     process.exit(1);

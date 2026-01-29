@@ -27,7 +27,7 @@ function getAvailableEndpoints() {
  * @returns {boolean}
  */
 function endpointExists(tag) {
-  return NAMED_ENDPOINTS.hasOwnProperty(tag);
+  return Object.prototype.hasOwnProperty.call(NAMED_ENDPOINTS, tag);
 }
 
 /**

@@ -341,43 +341,43 @@ curl -X POST http://localhost:9090/api/admin/kill-switch \
 
 ---
 
-## বাংলা সংক্ষিপ্ত বিবরণ
+## English Brief Description
 
-### প্রাথমিক সেটআপ
+### Initial Setup
 
-1. **API Key তৈরি করুন**:
+1. **Create API Key**:
 ```bash
 openssl rand -hex 32
 ```
 
-2. **Gateway এ সেটআপ করুন**: `email-sms-gateway/.env`
+2. **Setup in Gateway**: `email-sms-gateway/.env`
 ```bash
 API_KEY=your-key
 ```
 
-3. **Client এ সেটআপ করুন**: `/.env`
+3. **Setup in Client**: `/.env`
 ```bash
 GATEWAY_API_KEY=your-key
 ```
 
-### জরুরি বন্ধ
+### Emergency Shutdown
 
 ```bash
 curl -X POST http://localhost:9090/api/admin/kill-switch \
-  -H "X-API-Key: আপনার-কী" \
+  -H "X-API-Key: your-key" \
   -H "Content-Type: application/json" \
   -d '{"gateway": false}'
 ```
 
-### নিরাপত্তা টিপস
+### Security Tips
 
-- শক্তিশালী API key ব্যবহার করুন
-- `.env` file git এ commit করবেন না
-- HTTPS ব্যবহার করুন production এ
-- নিয়মিত logs চেক করুন
-- Emergency procedure টেস্ট করুন
+- Use strong API keys
+- Don't commit `.env` files to git
+- Use HTTPS in production
+- Check logs regularly
+- Test emergency procedures
 
-### সম্পূর্ণ ডকুমেন্টেশন
+### Complete Documentation
 
 - Authentication: [AUTHENTICATION.md](./AUTHENTICATION.md)
 - Kill Switch: [KILL_SWITCH.md](./KILL_SWITCH.md)

@@ -138,17 +138,17 @@ function buildConfig(overrides) {
 function getConfig() {
   const overrides = loadOverrides();
   const activeTag = overrides.activeConfigTag;
-  
+
   // If there's an active config, merge its settings
   if (activeTag && overrides.apiConfigs && overrides.apiConfigs[activeTag]) {
     const activeConfig = overrides.apiConfigs[activeTag];
-    
+
     // Merge active config settings with overrides
     const merged = { ...overrides };
-    
+
     // Store the active config tag
     merged.ACTIVE_CONFIG_TAG = activeTag;
-    
+
     // Override with active config's API settings
     if (activeConfig.apiEndpoint) merged.API_ENDPOINT = activeConfig.apiEndpoint;
     if (activeConfig.apiMethod) merged.API_METHOD = activeConfig.apiMethod;
@@ -159,14 +159,14 @@ function getConfig() {
     if (activeConfig.apiAuthPassword) merged.API_AUTH_PASSWORD = activeConfig.apiAuthPassword;
     if (activeConfig.apiQuery) merged.API_QUERY = activeConfig.apiQuery;
     if (activeConfig.apiBody) merged.API_BODY = activeConfig.apiBody;
-    
+
     // Override with active config's mapping settings
     if (activeConfig.mapItemsPath) merged.MAP_ITEMS_PATH = activeConfig.mapItemsPath;
     if (activeConfig.mapIdPath) merged.MAP_ID_PATH = activeConfig.mapIdPath;
     if (activeConfig.mapTimestampPath) merged.MAP_TIMESTAMP_PATH = activeConfig.mapTimestampPath;
     if (activeConfig.mapTitlePath !== undefined) merged.MAP_TITLE_PATH = activeConfig.mapTitlePath;
     if (activeConfig.mapDetailsPath !== undefined) merged.MAP_DETAILS_PATH = activeConfig.mapDetailsPath;
-    
+
     // Override with active config's notification settings
     if (activeConfig.enableSms !== undefined) merged.ENABLE_SMS = activeConfig.enableSms;
     if (activeConfig.enableEmail !== undefined) merged.ENABLE_EMAIL = activeConfig.enableEmail;
@@ -174,10 +174,10 @@ function getConfig() {
     if (activeConfig.phoneNumbers) merged.PHONE_NUMBERS = activeConfig.phoneNumbers;
     if (activeConfig.emailAddresses) merged.EMAIL_ADDRESSES = activeConfig.emailAddresses;
     if (activeConfig.checkIntervalMinutes) merged.CHECK_INTERVAL_MINUTES = activeConfig.checkIntervalMinutes;
-    
+
     return buildConfig(merged);
   }
-  
+
   return buildConfig(overrides);
 }
 

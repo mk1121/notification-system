@@ -1,10 +1,10 @@
 /**
  * Console Logger - Environment-aware logging utility
- * 
+ *
  * Usage:
  * - Development: Shows all logs (debug, info, warn, error)
  * - Production: Shows only important logs (warn, error, critical info)
- * 
+ *
  * Set NODE_ENV=production for production mode
  */
 

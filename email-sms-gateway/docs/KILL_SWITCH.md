@@ -377,62 +377,62 @@ Without valid authentication, requests will be rejected with 401 Unauthorized.
 2. Set to `true` to enable by default
 3. Restart server after changing `.env`
 
-## বাংলা সারসংক্ষেপ
+## Quick Summary
 
-### জরুরি পরিস্থিতিতে সব বন্ধ করুন
+### Disable Everything in Emergency
 
 ```bash
 curl -X POST http://localhost:9090/api/admin/kill-switch \
-  -H "X-API-Key: আপনার-কী" \
+  -H "X-API-Key: your-key" \
   -H "Content-Type: application/json" \
   -d '{"gateway": false}'
 ```
 
-### শুধু SMS বন্ধ করুন
+### Disable Only SMS
 
 ```bash
 curl -X POST http://localhost:9090/api/admin/kill-switch \
-  -H "X-API-Key: আপনার-কী" \
+  -H "X-API-Key: your-key" \
   -H "Content-Type: application/json" \
   -d '{"sms": false}'
 ```
 
-### শুধু Email বন্ধ করুন
+### Disable Only Email
 
 ```bash
 curl -X POST http://localhost:9090/api/admin/kill-switch \
-  -H "X-API-Key: আপনার-কী" \
+  -H "X-API-Key: your-key" \
   -H "Content-Type: application/json" \
   -d '{"email": false}'
 ```
 
-### সব চালু করুন
+### Enable Everything
 
 ```bash
 curl -X POST http://localhost:9090/api/admin/kill-switch \
-  -H "X-API-Key: আপনার-কী" \
+  -H "X-API-Key: your-key" \
   -H "Content-Type: application/json" \
   -d '{"gateway": true, "sms": true, "email": true}'
 ```
 
-### স্ট্যাটাস চেক করুন
+### Check Status
 
 ```bash
 curl http://localhost:9090/api/admin/kill-switch \
-  -H "X-API-Key: আপনার-কী"
+  -H "X-API-Key: your-key"
 ```
 
-### বৈশিষ্ট্য
+### Features
 
-- ✅ তাৎক্ষণিক চালু/বন্ধ - রিস্টার্ট লাগবে না
-- ✅ আলাদাভাবে SMS/Email নিয়ন্ত্রণ
-- ✅ API Key দিয়ে সুরক্ষিত
-- ✅ হেলথ চেক endpoint
-- ✅ স্বয়ংক্রিয় লগিং
+- ✅ Instant on/off - no restart needed
+- ✅ Separate SMS/Email control
+- ✅ Protected with API Key
+- ✅ Health check endpoint
+- ✅ Automatic logging
 
-### ব্যবহারের উদাহরণ
+### Usage Examples
 
-1. **জরুরি পরিস্থিতি**: সব বন্ধ করুন (`gateway: false`)
-2. **SMS Provider সমস্যা**: শুধু SMS বন্ধ (`sms: false`)
-3. **Email সমস্যা**: শুধু Email বন্ধ (`email: false`)
-4. **টেস্টিং**: Testing এর সময় বন্ধ, পরে চালু করুন
+1. **Emergency**: Disable everything (`gateway: false`)
+2. **SMS Provider Issue**: Disable only SMS (`sms: false`)
+3. **Email Issue**: Disable only Email (`email: false`)
+4. **Testing**: Disable during testing, enable later

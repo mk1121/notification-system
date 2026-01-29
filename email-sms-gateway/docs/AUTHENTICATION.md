@@ -203,32 +203,32 @@ curl -v "http://localhost:9090/api/sms/send?to=01234567890&text=Test"
 3. File permissions allow reading `.env`
 4. Server has been restarted
 
-## বাংলা সারসংক্ষেপ
+## Quick Summary
 
-### সেটআপ করুন
+### Setup
 
-1. **Gateway Server এ** (email-sms-gateway/.env):
+1. **In Gateway Server** (email-sms-gateway/.env):
 ```bash
-API_KEY=আপনার-সিক্রেট-কী
+API_KEY=your-secret-key
 ```
 
-2. **Main App এ** (/.env):
+2. **In Main App** (/.env):
 ```bash
-GATEWAY_API_KEY=আপনার-সিক্রেট-কী
+GATEWAY_API_KEY=your-secret-key
 ```
 
-3. **উভয় সার্ভার রিস্টার্ট করুন**
+3. **Restart Both Servers**
 
-### ব্যবহার করুন
+### Usage
 
-সব API request এ header পাঠান:
+Send header with all API requests:
 ```bash
-X-API-Key: আপনার-সিক্রেট-কী
+X-API-Key: your-secret-key
 ```
 
-### নিরাপত্তা টিপস
+### Security Tips
 
-- শক্তিশালী, র‍্যান্ডম API key ব্যবহার করুন
-- `.env` file কখনো git এ commit করবেন না
-- Production এ HTTPS ব্যবহার করুন
-- নিয়মিত API key পরিবর্তন করুন
+- Use strong, random API key
+- Never commit `.env` file to git
+- Use HTTPS in production
+- Rotate API key regularly

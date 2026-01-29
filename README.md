@@ -1,40 +1,145 @@
-# Payment Notification System
+# API Monitoring & Notification System
 
-A comprehensive notification system that monitors payment transactions via API and sends alerts through SMS and Email channels. Features include intelligent muting controls, logging, and a web-based configuration interface.
+A comprehensive notification system that monitors any API endpoints for errors and changes, sending real-time alerts through SMS and Email channels. Features intelligent muting controls, logging dashboard, and a web-based configuration interface with user authentication.
 
-## Features
+![Login Page](assets/images/login-page-ss.png)
+
+## 📋 Table of Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Quick Start](#quick-start)
+- [Documentation](#documentation)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Configuration](#configuration)
+- [Support](#support)
+
+## ✨ Features
 
 - 🔔 **Multi-Channel Notifications**: Send alerts via SMS and Email
+- 🔐 **User Authentication**: Secure login system with session management
 - 🎛️ **Dynamic Configuration**: Web UI to enable/disable channels and manage recipients
-- 🔇 **Smart Muting**: Time-based and auto-unmute controls for payment and API alerts
+- 🔇 **Smart Muting**: Time-based and auto-unmute controls for API alerts
 - 📊 **Logging Dashboard**: View, filter, and analyze all notification activities
-- 🚨 **API Monitoring**: Automatic failure detection with recovery notifications
+- 🚨 **API Monitoring**: Automatic error detection and failure recovery notifications
 - ⚙️ **Live Configuration**: Change settings without restarting the application
-- 🔄 **Auto-Recovery**: Unmutes automatically on timer expiry or new events
+- 🔄 **Auto-Recovery**: Unmutes automatically on timer expiry or when API recovers
+- 🎨 **Modern UI**: Responsive design with dark theme and intuitive controls
+- 📱 **Multiple Endpoints**: Support for monitoring multiple API endpoints simultaneously
 
-## Architecture
+## 📸 Screenshots
+
+### Login Page
+![Login Page](assets/images/login-page-ss.png)
+*Secure authentication system with session management*
+
+### Setup Wizard
+![Setup Wizard](assets/images/setup-wizard-page-ss.png)
+*Initial configuration wizard for easy setup*
+
+### Endpoint Management
+![Endpoint Page](assets/images/endpoint-page-ss.png)
+*Manage multiple payment endpoints with individual controls*
+
+### Logs Dashboard
+![Logs Dashboard](assets/images/logs-page-ss.png)
+*Real-time logs with filtering and statistics*
+
+### Email Notifications
+![Email Sample](assets/images/email.png)
+*Professional email notifications with action buttons*
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd notification
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Start the system
+npm start
+
+# Access the web interface
+# Login: http://localhost:3000/login
+# Default credentials: admin / admin123
+```
+
+For detailed setup instructions, see [Installation Guide](docs/INSTALLATION.md) or [Quick Start Guide](docs/QUICK_START.md).
+
+## 📚 Documentation
+
+### Getting Started
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get up and running in minutes
+- **[Installation Guide](docs/INSTALLATION.md)** - Detailed installation instructions
+- **[Setup Guide](docs/SETUP_GUIDE.md)** - Complete system setup walkthrough
+- **[UI Setup Guide](docs/UI_SETUP_GUIDE.md)** - Configure the web interface
+
+### Configuration & Usage
+- **[Configuration Guide](docs/CONFIGURATION.md)** - All configuration options explained
+- **[Usage Guide](docs/USAGE_GUIDE.md)** - How to use the system effectively
+- **[Multiple Endpoints Setup](docs/MULTIPLE_ENDPOINTS_SETUP.md)** - Configure multiple payment APIs
+- **[Multiple Endpoints Quick Reference](docs/MULTIPLE_ENDPOINTS_QUICK_REF.md)** - Quick reference for multi-endpoint features
+- **[Named Endpoints Guide](docs/NAMED_ENDPOINTS_GUIDE.md)** - Name and organize your endpoints
+
+### Technical Documentation
+- **[Architecture](docs/ARCHITECTURE.md)** - System architecture and design
+- **[Structure](docs/STRUCTURE.md)** - Project structure and file organization
+- **[API Reference](docs/API_REFERENCE.md)** - Complete API documentation
+- **[API Documentation](docs/API.md)** - Additional API details
+
+### Testing & Troubleshooting
+- **[Testing Guide](docs/TESTING.md)** - How to run tests
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+
+### Deployment & Advanced
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Implementation Notes](docs/IMPLEMENTATION_NOTES.md)** - Technical implementation details
+- **[Project Completion Checklist](docs/PROJECT_COMPLETION_CHECKLIST.md)** - Development checklist
+
+### Complete Documentation
+- **[Documentation Summary](docs/DOCUMENTATION_SUMMARY.md)** - Overview of all documentation
+- **[Complete Documentation](docs/DOCUMENTATION_COMPLETE.md)** - All documentation in one file
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   Payment Notification System                │
+│              API Monitoring & Notification System            │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
 │  ┌──────────────┐      ┌──────────────┐      ┌───────────┐ │
-│  │   Scheduler  │─────▶│  API Client  │─────▶│  Payment  │ │
-│  │ (scheduler.js)│      │   (api.js)   │      │    API    │ │
+│  │   Scheduler  │─────▶│  API Client  │─────▶│  Target   │ │
+│  │ (scheduler.js)│      │   (api.js)   │      │    APIs   │ │
 │  └──────────────┘      └──────────────┘      └───────────┘ │
-│         │                                                     │
-│         ├──────────┬──────────┬──────────┐                  │
-│         ▼          ▼          ▼          ▼                   │
-│  ┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐             │
-│  │  Logger  │ │  SMS   │ │ Email  │ │ State  │             │
-│  │(logger.js)│ │(sms.js)│ │(email) │ │Manager │             │
-│  └──────────┘ └────────┘ └────────┘ └────────┘             │
+│         │                    │                               │
+│         │               ┌────┴────┐                         │
+│         │               │  Error  │                         │
+│         │               │Detector │                         │
+│         │               └────┬────┘                         │
+│         │                    │                               │
+│         ├──────────┬─────────┴──────┬──────────┐           │
+│         ▼          ▼                ▼          ▼            │
+│  ┌──────────┐ ┌────────┐      ┌────────┐ ┌────────┐       │
+│  │  Logger  │ │  SMS   │      │ Email  │ │ State  │       │
+│  │(logger.js)│ │(sms.js)│      │(email) │ │Manager │       │
+│  └──────────┘ └────────┘      └────────┘ └────────┘       │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────┐    │
 │  │           Control Server (control-server.js)         │    │
+│  │  • User authentication & sessions                    │    │
 │  │  • Web UI for settings                               │    │
-│  │  • Mute/unmute endpoints                             │    │
+│  │  • Multiple endpoint management                      │    │
+│  │  • Mute/unmute controls                              │    │
 │  │  • Logging API & dashboard                           │    │
 │  │  • Real-time configuration                           │    │
 │  └─────────────────────────────────────────────────────┘    │
@@ -47,8 +152,10 @@ A comprehensive notification system that monitors payment transactions via API a
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Installation
+For detailed architecture information, see [Architecture Guide](docs/ARCHITECTURE.md).
 
+## 📦 Installation
+Target API endpoints to monitor
 ### Prerequisites
 
 - Node.js (v16 or higher)
@@ -57,47 +164,26 @@ A comprehensive notification system that monitors payment transactions via API a
 - SMS gateway credentials (Teletalk)
 - SMTP email server credentials
 
-### Setup
+### Basic Installation
 
-1. **Clone or download the repository**
-
-2. **Install dependencies**
+1. **Install dependencies**
    ```bash
-   cd /path/to/notification
    npm install
+   cd email-sms-gateway && npm install && cd ..
    ```
 
-3. **Configure environment variables**
-   
-   Copy the example environment file:
+2. **Configure environment**
    ```bash
    cp .env.example .env
    ```
    
    Edit `.env`:
    ```env
-   # Application Environment
-   NODE_ENV=development  # Use 'production' for production
-   
-   # Server Configuration
+   NODE_ENV=production
    CONTROL_SERVER_PORT=3000
    ```
 
-4. **Configure the system**
-   
-   Edit `controllerServer/config.js`:
-   ```javascript
-   const API_ENDPOINT = 'http://your-api-endpoint/payment/transactions';
-   const SMS_ENDPOINT = 'http://localhost:9090/api/sms/send';
-   const EMAIL_ENDPOINT = 'http://localhost:9090/api/email/send';
-   const CONTROL_SERVER_PORT = 3000;
-   const CONTROL_SERVER_URL = 'http://your-server-ip:3000';
-   const CHECK_INTERVAL = 0.5 * 60 * 1000; // 30 seconds
-   const PHONE_NUMBERS = ['01XXXXXXXXX'];
-   const EMAIL_ADDRESSES = ['your@email.com'];
-   ```
-
-4. **Configure SMS/Email Gateway**
+3. **Configure SMS/Email Gateway**
    
    Create `email-sms-gateway/.env`:
    ```env
@@ -114,38 +200,17 @@ A comprehensive notification system that monitors payment transactions via API a
    SMTP_USER=your-email@gmail.com
    SMTP_PASS=your-app-password
 
-   # Server Configuration
    PORT=9090
    ```
 
-## Usage
+4. **Start the system**
+   ```bash
+   npm start
+   ```
 
-### Environment Modes
+For detailed installation instructions, see [Installation Guide](docs/INSTALLATION.md).
 
-The system supports two environment modes with different logging levels:
-
-**Development Mode** (default):
-- Shows all logs including debug information
-- Detailed error stack traces
-- Verbose API responses
-- Useful for development and troubleshooting
-
-**Production Mode**:
-- Shows only critical logs (errors, warnings, important info)
-- Cleaner console output
-- Better performance
-- Recommended for production deployment
-
-To switch to production mode:
-```bash
-export NODE_ENV=production
-npm start
-```
-
-Or set it in your `.env` file:
-```env
-NODE_ENV=production
-```
+## 🎮 Usage
 
 ### Starting the System
 
@@ -153,8 +218,6 @@ NODE_ENV=production
 ```bash
 NODE_ENV=production npm start
 ```
-
-This runs both the notification scheduler and control server concurrently.
 
 **Development mode with auto-reload:**
 ```bash
@@ -168,527 +231,294 @@ npm start
 ```
 
 ### Web Interfaces
+API endpoints |
+| Configuration | `http://localhost:3000/config/ui` | System settings |
+| Logs | `http://localhost:3000/logs/ui` | View logs and statistics |
+| Mute Controls | `http://localhost:3000/mute/api/ui` | Mute API
+| Setup Wizard | `http://localhost:3000/setup` | Initial configuration |
+| Endpoints | `http://localhost:3000/endpoints/ui` | Manage payment endpoints |
+| Configuration | `http://localhost:3000/config/ui` | System settings |
+| Logs | `http://localhost:3000/logs/ui` | View logs and statistics |
+| Mute Controls | `http://localhost:3000/mute/payment/ui` | Mute payment alerts |
 
-#### Configuration Dashboard
-Access at: `http://your-server-ip:3000/config/ui`
+### Default Credentials
 
-Features:
-- Toggle SMS/Email notifications on/off
-- Add/remove phone numbers and email addresses
-- Control manual mute availability
-- Adjust check interval
-- Real-time status indicators
+- **Username:** `admin`
+- **Password:** `admin123`
 
-#### Logs Dashboard
-Access at: `http://your-server-ip:3000/logs/ui`
+⚠️ **Important:** Change the default password in `controllerServer/users.json` before deployment.
 
-Features:
-- View all notification activities
-- Filter by type (SMS, Email, Mute, API failure, etc.)
-- Statistics overview
-- Clear logs
-- Export capabilities
+For detailed usage instructions, see [Usage Guide](docs/USAGE_GUIDE.md).
 
-#### Mute Controls
-Access at: `http://your-server-ip:3000/mute/payment/ui`
+## 🔌 API Reference
 
-Features:
-- Time-based muting (custom duration in minutes)
-- Countdown timer
-- Auto-unmute on timer expiry or new payment detection
+### Authentication
 
-## API Reference
+```bash
+POST /api/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
 
 ### Configuration Endpoints
 
-#### GET `/config`
-Returns current configuration in JSON format.
+```bash
+# Get current configuration
+GET /config
 
-**Response:**
-```json
+# Update configuration
+POST /config
+Content-Type: application/json
+
 {
-  "API_ENDPOINT": "http://...",
-  "PHONE_NUMBERS": ["01XXXXXXXXX"],
-  "EMAIL_ADDRESSES": ["email@example.com"],
-  "ENABLE_SMS": true,
-  "ENABLE_EMAIL": true,
-  "ENABLE_MANUAL_MUTE": true,
-  "CHECK_INTERVAL": 30000
-}
-```
-
-#### POST `/config`
-Update configuration settings.
-
-**Request Body:**
-```json
-{
-  "phoneNumbers": "01XXXXXXXXX, 01YYYYYYYYY",
-  "emailAddresses": "email1@example.com, email2@example.com",
-  "checkIntervalMinutes": 1,
+  "phoneNumbers": "01XXXXXXXXX",
+  "emailAddresses": "user@example.com",
+  "checkIntervalMinutes": 0.5,
   "enableSms": true,
-  "enableEmail": true,
-  "enableManualMute": true
+  "enableEmail": true
 }
 ```
 
-**Response:**
-```json
+### Endpoint Management
+
+```bash
+# List all endpoints
+GET /api/endpoints
+
+# Add new eUser Service API",
+  "url": "http://api.example.com/user
+Content-Type: application/json
+
 {
-  "ok": true,
-  "config": { ... }
+  "name": "Main Payment API",
+  "url": "http://api.example.com/payments",
+  "enabled": true
 }
+
+# Update endpoint
+PUT /api/endpoints/:id
+
+# Delete endpoint
+DELETE /api/endpoints/:id
 ```
 
-### Logging Endpoints
+### Logging
 
-#### GET `/api/logs?lines=100&type=SMS`
-Get logs in JSON format with optional filters.
+```bash
+# Get logs with filters
+GET /api/logs?lines=100&type=SMS
 
-**Query Parameters:**
-- `lines` - Number of recent logs (default: 50)
-- `type` - Filter by type: SMS, EMAIL, MUTE, UNMUTE, API-FAILURE, etc.
-
-**Response:**
-```json
-{
-  "ok": true,
-  "count": 10,
-  "logs": [
-    {
-      "timestamp": "2026-01-26 13:30:45",
-      "type": "SMS",
-      "message": "Sent to: 01XXXXXXXXX | Message: Payment notification..."
-    }
-  ]
-}
+# Clear logs
+DELETE /api/logs
 ```
 
-#### DELETE `/api/logs`
-Clear all logs.
+### Mute Controls
 
-**Response:**
-```json
-{
-  "ok": true,
-  "message": "Logs cleared successfully"
-}
+```bash
+# Mute API alerts for specific duration
+GET /mute/api?minutes=30
+
+# Mute API failure alerts
+GET /mute/api
+
+# Unmute API alerts
+GET /unmute/api
+
+# Reset monitoring history
+GET /reset/api
 ```
 
-#### GET `/logs/ui`
-Web interface for viewing logs.
+For complete API documentation, see [API Reference](docs/API_REFERENCE.md).
 
-#### GET `/logs`
-Plain text format logs (last 100 entries).
+## ⚙️ Configuration
 
-### Mute Control Endpoints
+### Environment Modes
 
-#### GET `/mute/payment/ui`
-Web interface for muting payment alerts with custom duration.
+**Development Mode:**
+- Detailed logging
+- Debug information
+- Verbose output
 
-#### GET `/mute/payment?minutes=30`
-Mute payment alerts for specified minutes.
+**Production Mode:**
+- Clean logs
+- Better performance
+- Essential information only
 
-**Query Parameters:**
-- `minutes` - Duration in minutes (default: 30)
-
-#### GET `/mute/api`
-Mute API failure alerts (unmutes automatically on recovery).
-
-#### GET `/unmute/api`
-Manually unmute API failure alerts.
-
-#### GET `/reset/payment`
-Reset payment history and unmute alerts.
-
-### State Endpoint
-
-#### GET `/state`
-Get current system state.
-
-**Response:**
-```json
-{
-  "mutePayment": false,
-  "mutePaymentUntil": null,
-  "muteApi": false,
-  "lastApiStatus": "success",
-  "lastFailureMessage": "",
-  "processedPaymentIds": ["PAY123", "PAY124"]
-}
+Set in `.env`:
+```env
+NODE_ENV=production
 ```
 
-## Configuration Guide
+### Key Configuration Options
 
-### Runtime vs Static Configuration
+| Option | Description | Default |
+|--------|-------------|---------|
+| `CONTROL_SERVER_PORT` | Web interface port | 3000 |
+| `CHECK_INTERVAL` | API polling interval | 30 seconds |
+| `ENABLE_SMS` | Enable SMS notifications | true |
+| `ENABLE_EMAIL` | Enable email notifications | true |
+| `ENABLE_MANUAL_MUTE` | Enable mute controls | true |
 
-The system uses a two-layer configuration approach:
+For complete configuration guide, see [Configuration Guide](docs/CONFIGURATION.md).
 
-1. **Static Configuration** (`config.js`): Default values and system constants
-2. **Runtime Configuration** (`config-state.json`): User-modified settings via web UI
-
-Runtime settings override static configuration and persist across restarts.
-
-### Toggles and Features
-
-#### Enable/Disable SMS
-When disabled:
-- No SMS will be sent for any alerts
-- Phone numbers still stored in configuration
-- Logs show "SMS alerts disabled"
-
-#### Enable/Disable Email
-When disabled:
-- No emails will be sent
-- Email addresses still stored
-- Logs show "Email alerts disabled"
-
-#### Enable/Disable Manual Mute
-When enabled:
-- Mute buttons appear in email notifications
-- Mute UI pages are accessible
-- Users can pause alerts for custom duration
-
-When disabled:
-- Mute controls are blocked
-- Emails show "Manual mute is disabled"
-- Auto-unmute still works for system events
-
-### Check Interval
-
-Controls how often the system polls the payment API.
-
-- Minimum: 0.1 minutes (6 seconds)
-- Default: 0.5 minutes (30 seconds)
-- Changes require scheduler restart
-
-### Recipients Management
-
-**Phone Numbers:**
-- Comma-separated list
-- Format: 01XXXXXXXXX (Bangladesh)
-- No country code prefix needed for Teletalk
-
-**Email Addresses:**
-- Comma-separated list
-- Standard email format
-- Multiple recipients supported
-
-## Notification Behavior
-
-### Payment Alerts
-
-**Trigger:** New payment transactions detected from API
-
-**Behavior:**
-- Notifies on ALL transactions found
-- Tracks payment IDs to enable auto-unmute
-- Time-based mute with countdown
-- Auto-unmutes on timer expiry OR new payment ID
-
-**Content:**
-- Transaction details (Payment ID, Date)
-- Total transaction count
-- Mute control link (if enabled)
-- Timestamp in Asia/Dhaka timezone
-
-### API Failure Alerts
-
-**Trigger:** Payment API becomes unreachable or returns error
-
-**Behavior:**
-- Sends failure notification with error details
-- Tracks failure state
-- Auto-unmutes on API recovery
-- Sends recovery notification when API is back online
-
-**Content:**
-- HTTP status code
-- Error message
-- Mute button (if manual mute enabled)
-- System timestamp
-
-### Recovery Notifications
-
-**Trigger:** API recovers after failure
-
-**Behavior:**
-- Automatically sent when API responds successfully after failure
-- Clears failure state
-- Auto-unmutes API alerts
-
-**Content:**
-- Recovery timestamp
-- Previous error details
-- Confirmation message
-
-## Logging System
-
-### Log Types
-
-- **SMS**: SMS message sent
-- **EMAIL**: Email notification sent
-- **MUTE**: Manual mute action by user
-- **UNMUTE**: Manual unmute action by user
-- **AUTO-UNMUTE**: System automatic unmute (timer/new payment/API recovery)
-- **API-FAILURE**: Payment API failure detected
-- **API-RECOVERY**: Payment API recovered
-- **SYSTEM**: General system messages
-
-### Log Format
-
-```
-[YYYY-MM-DD HH:MM:SS] [TYPE] Message
-```
-
-Example:
-```
-[2026-01-26 13:30:45] [SMS] Sent to: 01XXXXXXXXX | Message: Payment notification...
-[2026-01-26 13:31:00] [EMAIL] Sent to: user@example.com | Subject: Payment Notification
-[2026-01-26 13:32:15] [MUTE] User muted payment (30 minutes)
-[2026-01-26 14:02:15] [AUTO-UNMUTE] Payment alerts auto-unmuted: mute timer expired
-```
-
-### Log Storage
-
-- Location: `controllerServer/notification.log`
-- Timezone: Asia/Dhaka (UTC+6)
-- Rotation: Manual (via UI or API)
-- Format: Plain text with structured entries
-
-## State Management
-
-### State Persistence
-
-State is stored in `controllerServer/notification-state.json`:
-
-```json
-{
-  "mutePayment": false,
-  "mutePaymentUntil": null,
-  "muteApi": false,
-  "lastApiStatus": "success",
-  "lastFailureMessage": "",
-  "processedPaymentIds": ["PAY123", "PAY124"]
-}
-```
-
-### Auto-Unmute Logic
-
-**Payment Alerts:**
-1. Timer-based: Unmutes when `mutePaymentUntil` timestamp is reached
-2. Event-based: Unmutes when new payment ID is detected
-3. Whichever comes first triggers auto-unmute
-
-**API Alerts:**
-- Auto-unmutes only when API recovers (returns successful response)
-
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 ### Common Issues
 
-**1. Notifications not sending**
-- Check if SMS/Email toggle is enabled in `/config/ui`
+**Notifications not sending:**
+- Check SMS/Email toggles in settings
 - Verify recipients are configured
-- Check SMS/Email gateway is running
-- Review logs at `/logs/ui`
+- Ensure gateway is running
+- Review logs dashboard
 
-**2. Control server not accessible**
-- Verify `CONTROL_SERVER_URL` matches your server IP
-- Check firewall allows port 3000
-- Ensure server is running: `netstat -tulpn | grep 3000`
+**Cannot access web interface:**
+- Verify port 3000 is not blocked
+- Check firewall settings
+- Ensure server is running
 
-**3. SMS gateway errors**
-- Verify Teletalk credentials in `.env`
-- Check balance and mask validity
-- Review gateway logs: `cd email-sms-gateway && npm start`
+**SMS gateway errors:**
+- Verify Teletalk credentials
+- Check account balance
+- Review mask configuration
 
-**4. Email not delivering**
+**Email not delivering:**
 - Verify SMTP credentials
-- Check SMTP port (587 for TLS, 465 for SSL)
-- Enable "Less secure apps" or use app password for Gmail
+- Check port configuration (587/465)
+- Enable app-specific password (Gmail)
 
-**5. Scheduler not checking API**
-- Check `CHECK_INTERVAL` in config
-- Restart scheduler: `npm start`
-- Verify API endpoint is reachable: `curl API_ENDPOINT`
+For detailed troubleshooting, see [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
 
-### Debug Mode
-
-Enable detailed logging:
-
-```bash
-DEBUG=* npm start
-```
-
-Check individual components:
-
-```bash
-# Test API connectivity
-node -e "require('./controllerServer/api').fetchTransactions().then(console.log)"
-
-# Test SMS sending
-cd email-sms-gateway && node test-send.js
-
-# Test Email sending
-cd email-sms-gateway && node test-send-email.js
-```
-
-## Production Deployment
+## 🚢 Production Deployment
 
 ### Using PM2 (Recommended)
 
-1. **Install PM2:**
-   ```bash
-   npm install -g pm2
-   ```
+```bash
+# Install PM2
+npm install -g pm2
 
-2. **Create ecosystem file (`ecosystem.config.js`):**
-   ```javascript
-   module.exports = {
-     apps: [
-       {
-         name: 'notification-scheduler',
-         script: 'controllerServer/server.js',
-         cwd: '/path/to/notification',
-         instances: 1,
-         autorestart: true,
-         watch: false,
-         max_memory_restart: '500M',
-         env: {
-           NODE_ENV: 'production'
-         }
-       },
-       {
-         name: 'control-server',
-         script: 'controllerServer/control-server.js',
-         cwd: '/path/to/notification',
-         instances: 1,
-         autorestart: true,
-         watch: false,
-         max_memory_restart: '500M',
-         env: {
-           NODE_ENV: 'production'
-         }
-       },
-       {
-         name: 'sms-email-gateway',
-         script: 'server.js',
-         cwd: '/path/to/notification/email-sms-gateway',
-         instances: 1,
-         autorestart: true,
-         watch: false,
-         max_memory_restart: '500M',
-         env: {
-           NODE_ENV: 'production'
-         }
-       }
-     ]
-   };
-   ```
+# Start all services
+pm2 start ecosystem.config.js
 
-3. **Start with PM2:**
-   ```bash
-   pm2 start ecosystem.config.js
-   pm2 save
-   pm2 startup
-   ```
+# Save configuration
+pm2 save
 
-4. **Monitor:**
-   ```bash
-   pm2 monit
-   pm2 logs
-   ```
+# Enable startup script
+pm2 startup
+```
 
 ### Using systemd
 
-Create service files in `/etc/systemd/system/`:
-
-**notification-scheduler.service:**
-```ini
-[Unit]
-Description=Payment Notification Scheduler
-After=network.target
-
-[Service]
-Type=simple
-User=your-user
-WorkingDirectory=/path/to/notification
-ExecStart=/usr/bin/node controllerServer/server.js
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start:
+Create service files and enable:
 ```bash
-sudo systemctl daemon-reload
 sudo systemctl enable notification-scheduler
 sudo systemctl start notification-scheduler
 ```
 
-## Security Considerations
+For detailed deployment instructions, see [Deployment Guide](docs/DEPLOYMENT.md).
 
-1. **Restrict Control Server Access:**
-   - Use firewall to limit IP access to port 3000
-   - Implement authentication (not included in base version)
-   - Use HTTPS with reverse proxy (nginx/Apache)
+## 🔒 Security Considerations
 
-2. **Protect Credentials:**
-   - Never commit `.env` files to version control
-   - Use environment variables in production
-   - Rotate API keys and passwords regularly
+1. **Authentication:**
+   - Change default password immediately
+   - Use strong passwords
+   - Implement session timeout
 
-3. **Log Sensitivity:**
-   - Logs may contain phone numbers and email addresses
-   - Implement log rotation with retention policy
-   - Restrict log file access permissions
+2. **Network Security:**
+   - Use firewall rules
+   - Implement HTTPS with reverse proxy
+   - Restrict IP access
 
-4. **Network Security:**
-   - Use VPN for remote access to control panel
-   - Implement rate limiting on endpoints
-   - Validate all user inputs
+3. **Credentials:**
+   - Never commit `.env` files
+   - Use environment variables
+   - Rotate passwords and API keys regularly
 
-## Contributing
+4. **Logs:**
+   - May contain sensitive API data
+   - Implement log rotation
+   - Restrict file permissions
 
-To extend or modify the system:
+## 📁 Project Structure
 
-1. **Add new notification channels:**
-   - Create new module in `controllerServer/` (e.g., `push.js`)
-   - Add to scheduler notification flow
-   - Update config with enable/disable toggle
+```
+notification/
+├── controllerServer/          # Main application server
+│   ├── server.js             # Notification scheduler
+│   ├── control-server.js     # Web interface & API
+│   ├── api.js                # Payment API client
+│   ├── config.js             # Configuration management
+│   ├── config-endpoints.js   # Endpoint management
+│   ├── scheduler.js          # Notification scheduler
+│   ├── email.js              # Email handler
+│   ├── sms.js                # SMS handler
+│   ├── logger.js             # Logging system
+│   └── users.json            # User credentials
+├── email-sms-gateway/        # SMS/Email gateway service
+│   ├── server.js             # Gateway server
+│   ├── teletalkClient.js     # Teletalk integration
+│   └── emailClient.js        # Email SMTP client
+├── tests/                    # Test suite
+├── docs/                     # Documentation
+└── assets/                   # Images and resources
+```
 
-2. **Add new endpoints:**
-   - Extend `control-server.js`
-   - Follow existing patterns for HTML responses
-   - Update documentation
+For detailed structure information, see [Structure Guide](docs/STRUCTURE.md).
 
-3. **Modify notification content:**
-   - Edit email/SMS templates in `scheduler.js`
-   - Update HTML styling in control server responses
+## 🧪 Testing
 
-## License
+```bash
+# Run all tests
+npm test
+
+# Run specific test suite
+npm run test:gateway
+npm run test:server
+
+# Quick test
+./tests/quick-test.sh
+```
+
+For testing guide, see [Testing Documentation](docs/TESTING.md).
+
+## 📄 License
 
 ISC
 
-## Support
+## 💬 Support
 
 For issues and questions:
-- Check logs at `/logs/ui`
-- Review this documentation
-- Test individual components using debug scripts
-- Check gateway logs in `email-sms-gateway/`
+- Check the [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+- Review the [Complete Documentation](docs/DOCUMENTATION_COMPLETE.md)
+- Check logs at the logs dashboard
+- Test components using debug scripts
 
-## Version History
+## 🗺️ Version History
 
-### 1.0.0 (Current)
+### 2.0.0 (Current)
+- User authentication system
+- Multiple endpoint support
+- Named endpoints with custom identifiers
+- Enhanced UI with dark theme
+- Setup wizard for easy configuration
+- Improved security features
+- Session management
+- Documentation reorganization
+
+### 1.0.0
 - Initial release
 - Multi-channel notifications (SMS, Email)
 - Web-based configuration
 - Mute controls with timer
 - Logging dashboard
-- API failure monitoring
+- API error detection and monitoring
 - Auto-unmute logic
-- Dynamic configuration persistence
+
+---
+
+**Made with ❤️ for efficient API monitoring**
+
+For more information, explore the [complete documentation](docs/).

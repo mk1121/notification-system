@@ -13,15 +13,15 @@ const consoleLog = require('./console-logger');
 async function sendEmail(emailAddress, subject, text, html, emailEndpoint) {
   try {
     const config = getConfig();
-    
+
     // Use provided endpoint or fall back to config
     const endpoint = emailEndpoint || config.EMAIL_ENDPOINT;
-    
+
     if (!endpoint) {
       consoleLog.error('Email endpoint not configured', 'EMAIL');
       throw new Error('Email endpoint not configured');
     }
-    
+
     const payload = {
       to: emailAddress,
       subject,
@@ -41,10 +41,10 @@ async function sendEmail(emailAddress, subject, text, html, emailEndpoint) {
 
     consoleLog.debug(`Sending email to ${emailAddress} via ${endpoint}`, 'EMAIL');
     const response = await axios.post(endpoint, payload, { headers });
-    
+
     consoleLog.debug(`Email sent successfully to ${emailAddress}`, 'EMAIL');
     consoleLog.debug(`Email Response: ${JSON.stringify(response.data)}`, 'EMAIL');
-    
+
     return response.data;
   } catch (error) {
     consoleLog.error(`Error sending email to ${emailAddress}: ${error.message}`, 'EMAIL', error);

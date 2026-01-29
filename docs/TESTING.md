@@ -324,34 +324,34 @@ test:
 
 ---
 
-## বাংলা সারসংক্ষেপ
+## English Summary
 
-### সব কিছু একসাথে টেস্ট করুন
+### Test All Together
 ```bash
 bash tests/quick-test.sh
 ```
 
-### শুধু Gateway টেস্ট করুন
+### Test Gateway Only
 ```bash
 node tests/gateway-tests.js
 ```
 
-### শুধু Control Server টেস্ট করুন
+### Test Control Server Only
 ```bash
 node tests/control-server-tests.js
 ```
 
-### Integration টেস্ট
+### Integration Tests
 ```bash
 bash tests/run-tests.sh
 ```
 
-### Environment সেট করুন
+### Set Up Environment
 ```bash
 export API_KEY="test-secret-key-12345"
 ```
 
-### সার্ভার চালু করুন
+### Start Servers
 ```bash
 # Terminal 1
 cd email-sms-gateway && npm start
@@ -363,10 +363,10 @@ cd controllerServer && npm start
 bash tests/quick-test.sh
 ```
 
-### ফলাফল দেখুন
-- সবুজ = পাস
-- লাল = ফেইল
+### View Results
+- Green = Pass
+- Red = Fail
 
-### কাস্টম টেস্ট তৈরি করুন
-`tests/my-test.js` তে নতুন ফাইল তৈরি করুন
-`node tests/my-test.js` দিয়ে চালান
+### Create Custom Tests
+Create new file in `tests/my-test.js`
+Run with `node tests/my-test.js`

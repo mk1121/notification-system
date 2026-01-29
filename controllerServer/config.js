@@ -76,7 +76,7 @@ module.exports = {
   // Named endpoints
   NAMED_ENDPOINTS,
   DEFAULT_ENDPOINT_TAG,
-  
+
   // Backward compatibility exports (old style)
   API_ENDPOINT,
   API_METHOD,

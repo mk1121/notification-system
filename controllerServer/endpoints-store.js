@@ -51,20 +51,20 @@ function getEndpointConfig(tag = DEFAULT_ENDPOINT_TAG) {
   if (!tag) {
     throw new Error('No endpoint tag specified and no default endpoint is set');
   }
-  
+
   const state = loadState();
-  
+
   // First check if there's an override (created from Setup UI)
   if (state.endpointOverrides && state.endpointOverrides[tag]) {
     return state.endpointOverrides[tag];
   }
-  
+
   // Then check base config (if any)
   const baseConfig = NAMED_ENDPOINTS[tag];
   if (!baseConfig) {
     throw new Error(`Endpoint '${tag}' not found. Create it via Setup UI at http://localhost:3000/setup/ui`);
   }
-  
+
   return { ...baseConfig };
 }
 
@@ -74,14 +74,14 @@ function getEndpointConfig(tag = DEFAULT_ENDPOINT_TAG) {
 function getAllEndpoints() {
   const state = loadState();
   const endpoints = {};
-  
+
   // First add all base configs
   for (const tag in NAMED_ENDPOINTS) {
     const base = NAMED_ENDPOINTS[tag];
     const overrides = state.endpointOverrides && state.endpointOverrides[tag];
     endpoints[tag] = overrides ? { ...base, ...overrides } : { ...base };
   }
-  
+
   // Then add any configs created from Setup UI that don't have base config
   if (state.endpointOverrides) {
     for (const tag in state.endpointOverrides) {
@@ -90,7 +90,7 @@ function getAllEndpoints() {
       }
     }
   }
-  
+
   return endpoints;
 }
 
@@ -115,23 +115,23 @@ function getActiveTag() {
  */
 function setActiveTags(tags) {
   const state = loadState();
-  
+
   // Ensure tags is array
   const tagArray = Array.isArray(tags) ? tags : [tags];
-  
+
   // Validate all tags exist
   for (const tag of tagArray) {
     const existsInBase = NAMED_ENDPOINTS[tag];
     const existsInOverrides = state.endpointOverrides && state.endpointOverrides[tag];
-    
+
     if (!existsInBase && !existsInOverrides) {
       throw new Error(`Endpoint '${tag}' not found. Create it via Setup UI.`);
     }
   }
-  
+
   state.activeEndpointTags = tagArray;
   saveState(state);
-  
+
   return tagArray;
 }
 
@@ -148,22 +148,22 @@ function setActiveTag(tag) {
 function addActiveTag(tag) {
   const state = loadState();
   const tags = state.activeEndpointTags || [];
-  
+
   // Check if endpoint exists
   const existsInBase = NAMED_ENDPOINTS[tag];
   const existsInOverrides = state.endpointOverrides && state.endpointOverrides[tag];
-  
+
   if (!existsInBase && !existsInOverrides) {
     throw new Error(`Endpoint '${tag}' not found. Create it via Setup UI.`);
   }
-  
+
   // Add if not already present
   if (!tags.includes(tag)) {
     tags.push(tag);
     state.activeEndpointTags = tags;
     saveState(state);
   }
-  
+
   return tags;
 }
 
@@ -174,10 +174,10 @@ function removeActiveTag(tag) {
   const state = loadState();
   const tags = state.activeEndpointTags || [];
   const filtered = tags.filter(t => t !== tag);
-  
+
   state.activeEndpointTags = filtered;
   saveState(state);
-  
+
   return filtered;
 }
 
@@ -186,7 +186,7 @@ function removeActiveTag(tag) {
  */
 function toggleActiveTag(tag) {
   const tags = getActiveTags();
-  
+
   if (tags.includes(tag)) {
     return removeActiveTag(tag);
   } else {
@@ -210,20 +210,20 @@ function updateEndpoint(tag, updates) {
   if (!state.endpointOverrides) {
     state.endpointOverrides = {};
   }
-  
+
   // Get base config if exists, otherwise create new
   const baseConfig = NAMED_ENDPOINTS[tag] || state.endpointOverrides[tag] || {};
-  
+
   // Auto-set SMS and Email endpoints from config (don't allow overrides)
   const config = getConfig();
   const autoSmsEndpoint = config.SMS_ENDPOINT || 'http://localhost:9090/api/sms/send';
   const autoEmailEndpoint = config.EMAIL_ENDPOINT || 'http://localhost:9090/api/email/send';
-  
+
   // Merge updates but exclude smsEndpoint and emailEndpoint (they are auto-set)
   const filteredUpdates = { ...updates };
   delete filteredUpdates.smsEndpoint;
   delete filteredUpdates.emailEndpoint;
-  
+
   // Merge updates
   state.endpointOverrides[tag] = {
     ...baseConfig,
@@ -234,9 +234,9 @@ function updateEndpoint(tag, updates) {
     tag: tag, // Keep the tag
     updatedAt: new Date().toISOString()
   };
-  
+
   saveState(state);
-  
+
   return getEndpointConfig(tag);
 }
 
@@ -245,7 +245,7 @@ function updateEndpoint(tag, updates) {
  */
 function resetEndpoint(tag) {
   const state = loadState();
-  
+
   if (state.endpointOverrides && state.endpointOverrides[tag]) {
     // If no base config, delete the endpoint entirely
     if (!NAMED_ENDPOINTS[tag]) {
@@ -253,12 +253,12 @@ function resetEndpoint(tag) {
       saveState(state);
       return { deleted: true, message: `Endpoint '${tag}' deleted successfully` };
     }
-    
+
     // Otherwise, just remove override to revert to base
     delete state.endpointOverrides[tag];
     saveState(state);
   }
-  
+
   return getEndpointConfig(tag);
 }
 
@@ -267,8 +267,8 @@ function resetEndpoint(tag) {
  */
 function endpointExists(tag) {
   const state = loadState();
-  const inBase = NAMED_ENDPOINTS.hasOwnProperty(tag);
-  const inOverrides = state.endpointOverrides && state.endpointOverrides.hasOwnProperty(tag);
+  const inBase = Object.prototype.hasOwnProperty.call(NAMED_ENDPOINTS, tag);
+  const inOverrides = state.endpointOverrides && Object.prototype.hasOwnProperty.call(state.endpointOverrides, tag);
   return inBase || inOverrides;
 }
 
@@ -279,7 +279,7 @@ function getAvailableTags() {
   const state = loadState();
   const baseTags = Object.keys(NAMED_ENDPOINTS);
   const overrideTags = state.endpointOverrides ? Object.keys(state.endpointOverrides) : [];
-  
+
   // Combine and deduplicate
   return [...new Set([...baseTags, ...overrideTags])];
 }
