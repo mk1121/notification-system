@@ -1,8 +1,10 @@
 {
-  "activeEndpointTags": [],
+  "activeEndpointTags": [
+    "t1"
+  ],
   "endpointOverrides": {
-    "bank": {
-      "apiEndpoint": "http://192.168.1.154:8076/ords/nts_ws/cpa/payment/spyTransactionFailure",
+    "t1": {
+      "apiEndpoint": "https://c5ncdzm9-8076.asse.devtunnels.ms/ords/nts_ws/cpa/payment/spyTransactionFailure",
       "method": "GET",
       "authType": "",
       "authToken": "",
@@ -13,21 +15,23 @@
       "body": {},
       "mapItemsPath": "items",
       "mapIdPath": "products_id",
-      "mapTimestampPath": "approval_date",
+      "mapTimestampPath": "createdAt",
       "mapTitlePath": "",
       "mapDetailsPath": "",
-      "enableSms": false,
+      "enableSms": true,
       "enableEmail": true,
       "enableManualMute": true,
-      "checkInterval": 60000,
-      "phoneNumbers": [],
+      "checkInterval": 30000,
+      "phoneNumbers": [
+        "01571306597"
+      ],
       "emailAddresses": [
         "maruf.3666@gmail.com"
       ],
       "smsEndpoint": "http://localhost:9090/api/sms/send",
       "emailEndpoint": "http://localhost:9090/api/email/send",
-      "tag": "bank",
-      "updatedAt": "2026-01-29T04:46:36.948Z"
+      "tag": "t1",
+      "updatedAt": "2026-01-29T11:19:02.467Z"
     }
   },
   "globalSettings": {}

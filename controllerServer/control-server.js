@@ -83,6 +83,22 @@ function saveState(state) {
   }
 }
 
+function removeEndpointState(tag) {
+  try {
+    const state = loadState();
+    if (state.endpoints && state.endpoints[tag]) {
+      delete state.endpoints[tag];
+      saveState(state);
+      consoleLog.info(`Removed endpoint state for: ${tag}`, 'STATE');
+      return true;
+    }
+    return false;
+  } catch (err) {
+    consoleLog.error(`Error removing endpoint state for ${tag}`, 'STATE', err);
+    return false;
+  }
+}
+
 // Authentication middleware
 function requireLogin(req, res, next) {
   if (!req.session) {
@@ -371,8 +387,23 @@ app.get('/state', (_req, res) => {
 });
 
 app.get('/mute/payment/ui', (_req, res) => {
-  const config = getConfig();
-  if (!config.ENABLE_MANUAL_MUTE) {
+  const endpointTag = _req.query.endpoint || null;
+  
+  // Get endpoint config to check if manual mute is enabled
+  let enableManualMute = false;
+  if (endpointTag) {
+    try {
+      const endpointConfig = getEndpointConfig(endpointTag);
+      enableManualMute = endpointConfig.enableManualMute;
+    } catch (err) {
+      enableManualMute = false;
+    }
+  } else {
+    const config = getConfig();
+    enableManualMute = config.ENABLE_MANUAL_MUTE;
+  }
+  
+  if (!enableManualMute) {
     res.type('text/html').send(`
       <!DOCTYPE html>
       <html><body style="font-family:Arial,sans-serif;padding:24px;">
@@ -1923,6 +1954,10 @@ app.post('/api/endpoints/:tag/reset', (req, res) => {
       } catch (err) {
         console.warn(`Could not stop scheduler for ${req.params.tag}: ${err.message}`);
       }
+
+      // Clean up endpoint state from notification-state.json
+      removeEndpointState(req.params.tag);
+
       return res.json({ ok: true, deleted: true, message: result.message });
     }
 

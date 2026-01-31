@@ -250,6 +250,11 @@ function resetEndpoint(tag) {
     // If no base config, delete the endpoint entirely
     if (!NAMED_ENDPOINTS[tag]) {
       delete state.endpointOverrides[tag];
+      
+      // Remove from active tags when deleting endpoint
+      const tags = state.activeEndpointTags || [];
+      state.activeEndpointTags = tags.filter(t => t !== tag);
+      
       saveState(state);
       return { deleted: true, message: `Endpoint '${tag}' deleted successfully` };
     }
